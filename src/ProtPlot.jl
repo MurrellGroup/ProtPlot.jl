@@ -1,10 +1,7 @@
 module ProtPlot
 
-using BackBoner
-export BackBoner
-
-import AssigningSecondaryStructure as ASS
-export ASS
+using Backboner
+export Backboner
 
 using GLMakie
 using Colors, ColorSchemes

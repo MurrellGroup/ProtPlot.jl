@@ -1,45 +1,64 @@
-function render!(segment::Segment{ASS.Loop})
+export render, render!
+
+function render!(scene::Scene, segment::Segment{Loop})
     startpoint = segment_startpoint(segment)
-    stoppoint = segment_stoppoint(segment)
-    anchors = alphacarbon_coord_matrix(segment.subbackbone[2:end])
-    coords = hcat(startpoint, anchors, stoppoint)
-    surface_vertices, color_matrix = tube(coords, 0.3, spline_quality=10, tube_quality=10, color_start=segment.range.start/length(segment.backbone), color_end=segment.range.stop/length(segment.backbone))
-    surface!(eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    endpoint = segment_endpoint(segment)
+    controls = @view alphacarbon_coord_matrix(segment)[:, 2:end]
+    coords = hcat(startpoint, controls, endpoint)
+    surface_vertices, color_matrix = tube(coords, 0.3, spline_quality=10, tube_quality=10, color_start=segment.range.start/length(segment.chain), color_end=segment.range.stop/length(segment.chain))
+    surface!(scene, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(segment::Segment{ASS.Helix})
+function render!(scene::Scene, segment::Segment{Helix})
     startpoint = segment_startpoint(segment)
-    stoppoint = segment_stoppoint(segment)
-    anchors = alphacarbon_coord_matrix(segment.subbackbone[2:end]) # startpoint is first point instead. including first N *and* CA could mess with normals
-    coords = hcat(startpoint, anchors, stoppoint)
-    surface_vertices, color_matrix = tube(coords, 1, x_elongation=0.15, color_start=segment.range.start/length(segment.backbone), color_end=segment.range.stop/length(segment.backbone))
-    surface!(eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    endpoint = segment_endpoint(segment)
+    controls = @view alphacarbon_coord_matrix(segment)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
+    coords = hcat(startpoint, controls, endpoint)
+    surface_vertices, color_matrix = tube(coords, 1, spline_quality=10, tube_quality=10, x_elongation=0.25, color_start=segment.range.start/length(segment.chain), color_end=segment.range.stop/length(segment.chain))
+    surface!(scene, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(segment::Segment{ASS.Strand})
+function render!(scene::Scene, segment::Segment{Strand})
     startpoint = segment_startpoint(segment)
-    stoppoint = segment_stoppoint(segment)
-    oxygen_coords = oxygen_coord_matrix(segment.subbackbone)
-    oxygen_coords_side1 = oxygen_coords[:, 1:2:end-1]
-    oxygen_coords_side2 = oxygen_coords[:, 2:2:end]
-    coords1 = hcat(startpoint, oxygen_coords_side1, stoppoint)
-    coords2 = hcat(startpoint, oxygen_coords_side2, stoppoint)
-    surface_vertices, color_matrix = sheet(coords1, coords2, thickness=0.5, width_pad=0.5, color_start=segment.range.start/length(segment.backbone), color_end=segment.range.stop/length(segment.backbone))
-    surface!(eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    endpoint = segment_endpoint(segment)
+    oxygen_coords_side1 = @view oxygen_coord_matrix(segment)[:, 1:2:end-1]
+    oxygen_coords_side2 = @view oxygen_coord_matrix(segment)[:, 2:2:end]
+    coords1 = hcat(startpoint, oxygen_coords_side1, endpoint)
+    coords2 = hcat(startpoint, oxygen_coords_side2, endpoint)
+    surface_vertices, color_matrix = sheet(coords1, coords2, spline_quality=5, thickness=0.5, width_pad=0.5, color_start=segment.range.start/length(segment.chain), color_end=segment.range.stop/length(segment.chain))
+    surface!(scene, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(backbone::Backbone{4}, ssclasses::Vector{ASS.SSClass})
-    segments = segmenter(ssclasses, backbone)
-    render!.(segments)
-end
-
-function render!(backbones::Vector{<:Backbone{4}})
-    set_theme!(backgroundcolor = :black)
-
-    ssclasses_vec = ASS.dssp([bb.coords for bb in backbones])
-    scene = lines(Float64[])#, axis=(;type=Axis3, aspect=:data))
-    for (backbone, ssclasses) in zip(backbones, ssclasses_vec)
-        render!(backbone, ssclasses)
+function render!(scene::Scene, chain::Chain{4})
+    @assert !has_missing_ss(chain)
+    for segment in segments(chain)
+        render!(scene, segment)
     end
+end
+
+function render(backbone::Backbone{4})
+    has_missing_ss(backbone) && assign_secondary_structure!(backbone)
+    scene = Scene(backgroundcolor=:black)#, axis=(;type=Axis3, aspect=:data))
+    cam3d!(scene)
+    for chain in backbone
+        render!(scene, chain)
+    end
+    center!(scene)
     display(scene)
+end
+
+function backbone_gif(backbones::Vector{<:Backbone{4}})
+    scene = Scene(backgroundcolor=:black)#, axis=(;type=Axis3, aspect=:data))
+    record(scene, "backbone.gif", eachindex(backbones)) do i
+        empty!(scene)
+        cam3d!(scene)
+        backbone = backbones[i]
+        backbone[1].coords[1,:,:] += backbone[1].coords[1,:,:] * 0.001i 
+        backbone[2].coords[1,:,:] += backbone[1].coords[1,:,:] * 0.001i 
+        has_missing_ss(backbone) && assign_secondary_structure!(backbone)
+        for chain in backbone
+            render!(scene, chain)
+        end
+        update_cam!(scene)
+    end
 end
