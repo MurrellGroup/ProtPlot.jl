@@ -1,14 +1,62 @@
 path_tangent(p1, p2, p3) = normalize!(p3 - p1)
 curved_path_normal(p1, p2, p3) = -normalize!(p1 - p2 + p3 - p2)
 
-nitrogen_coord_matrix(chain::AbstractChain) = atom_coord_matrix(chain, 1)
-alphacarbon_coord_matrix(chain::AbstractChain) = atom_coord_matrix(chain, 2)
-carbon_coord_matrix(chain::AbstractChain) = atom_coord_matrix(chain, 3)
-oxygen_coord_matrix(chain::AbstractChain) = atom_coord_matrix(chain, 4)
-
-const DEFAULT_COLORSCHEME = :jet
-
 function tube_surface(
+    points::AbstractMatrix{T},
+    radius::Real = 0.5;
+    spline_quality = 10,
+    tube_quality = 20,
+    ghost_control_start = nothing,
+    ghost_control_end = nothing,
+) where T <: Real
+
+    path = if !isnothing(ghost_control_start) && !isnothing(ghost_control_end)
+        spline(points, ghost_control_start, ghost_control_end, m=spline_quality, k=min(3, size(points, 2)-1))
+    else
+    spline_quality = size(points, 2) == 2 ? 2 : spline_quality
+        spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
+    end
+
+    N = size(path, 2)
+    tube_angles = LinRange(0, 2π, tube_quality)
+    surface_vertices = zeros(T, 3, N, length(tube_angles))
+
+    # Precompute tangents and initialize normals
+    tangents = [path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N]
+    normals = zeros(T, 3, N)
+
+    # Initial normal vector (arbitrary, but not aligned with the first tangent)
+    normals[:, 1] = abs(tangents[1][1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
+
+    # Propagate the normal vector along the path
+    for idx in 2:N
+        prev_normal = normals[:, idx-1]
+        t = tangents[idx]
+        projected_normal = prev_normal - dot(t, prev_normal) * t
+        if norm(projected_normal) < 1e-5
+            projected_normal = cross(tangents[idx - 1], t)
+        end
+        normals[:, idx] = normalize!(projected_normal)
+    end
+
+    # Generate surface vertices
+    for idx in 1:N
+        t = tangents[idx]
+        n = normals[:, idx]
+        b = cross(n, t)
+
+        for (jdx, angle) in enumerate(tube_angles)
+            offset = radius * (cos(angle) * n + sin(angle) * b)
+            surface_vertices[:, idx, jdx] = path[:, idx] + offset
+        end
+    end
+    return surface_vertices
+end
+
+# Function to generate a tube surface given a path and radius
+# normal depends on second derivative of the path
+# does weird twist when second derivative changes too quickly
+function helix_surface(
     points::AbstractMatrix{T},
     radius::Real = 0.5;
     spline_quality = 10,
@@ -19,43 +67,20 @@ function tube_surface(
     path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
     N = size(path, 2)
     tube_angles = LinRange(0, 2π, tube_quality)
-    tube_surface_vertices = zeros(T, 3, N, length(tube_angles))
+    surface_vertices = zeros(T, 3, N, length(tube_angles))
     for idx in 1:N
         three_path_points = eachcol(@view(path[:, min(max(begin,idx-1),end-2):min(max(begin,idx-1)+2,end)])) # understandable expressions are for the weak
         t = path_tangent(three_path_points...)
         n = curved_path_normal(three_path_points...)
         n = cross(t, cross(n, t))
 
-        b = cross(n, t)        
+        b = cross(n, t)
         for (jdx, v) in enumerate(tube_angles)
             offset = radius .* (x_elongation*cos(v) .* n .+ z_elongation*sin(v) .* b)
-            tube_surface_vertices[:, idx, jdx] = path[:, idx] .- offset
+            surface_vertices[:, idx, jdx] = path[:, idx] .- offset
         end
     end
-    return tube_surface_vertices
-end
-
-# Function to generate a tube surface given a path and radius
-# normal depends on second derivative of the path
-# does weird twist when second derivative changes too quickly
-function tube(
-    points::AbstractMatrix{T},
-    radius::Real = 0.5;
-    spline_quality = 10,
-    tube_quality = 20,
-    x_elongation = 1,
-    z_elongation = 1,
-    color_start = 0,
-    color_end = 1,
-    colorscheme::Union{ColorScheme, Symbol} = DEFAULT_COLORSCHEME,
-) where T <: Real
-    surface_vertices = tube_surface(
-        points, radius,
-        spline_quality=spline_quality, tube_quality=tube_quality,
-        x_elongation=x_elongation, z_elongation=z_elongation)
-    colorscheme = colorscheme isa ColorScheme ? colorscheme : colorschemes[colorscheme]
-    color_matrix = repeat(colorscheme[LinRange(color_start, color_end, size(surface_vertices, 2))], inner=(spline_quality, 1))
-    return surface_vertices, color_matrix
+    return surface_vertices
 end
 
 # uses surrounding points to move the ends of the paths slightly away from each other, if they are equal
@@ -65,70 +90,69 @@ function deintersect_ends!(path1::AbstractMatrix{T}, path2::AbstractMatrix{T}) w
     @assert size(path1, 1) >= 3
     if path1[:,1] == path2[:,1]
         next_binormal = path1[:,2] - path2[:,2]
-        path1[:,1] += next_binormal .* 0.01
-        path2[:,1] -= next_binormal .* 0.01
+        path1[:,1] += next_binormal .* 0.1
+        path2[:,1] -= next_binormal .* 0.1
     end
     if path1[:,end] == path2[:,end]
         prev_binormal = path1[:,end-1] - path2[:,end-1]
-        path1[:,end] += prev_binormal .* 0.01
-        path2[:,end] -= prev_binormal .* 0.01
+        path1[:,end] += prev_binormal .* 0.1
+        path2[:,end] -= prev_binormal .* 0.1
     end
 end
 
-function sheet_surface(
+# 0 <= t <= 1
+# l is the length of the arrow body
+# w is the width of the arrow body
+# W is the width of the arrow head
+# the length of the arrow head becomes 1 - l
+# the shape is normalized such that length of the entire arrow is 1
+arrow_function(l=0.5, w=0.5, W=1.0) = t -> t > l ? W*(t-1)/(l-1) : w
+
+function arrow_surface(
     points1::AbstractMatrix{T},
     points2::AbstractMatrix{T};
-    thickness = 0.5,
-    width_pad = 0.0,
-    spline_quality = 4,
+    width = 1.0,
+    thickness = 0.3,
+    spline_quality = 10,
 ) where T <: Real
     half_thickness = thickness / 2
     max_L = max(size(points1, 2), size(points2, 2))
     path1 = spline(points1, N=max_L*spline_quality, k=min(3, size(points1, 2)-1))
     path2 = spline(points2, N=max_L*spline_quality, k=min(3, size(points2, 2)-1))
-    deintersect_ends!(path1, path2)
+    deintersect_ends!(path1, path2) # this is a hack to make the normals work
     @assert size(path1, 2) == size(path2, 2)
     N = size(path1, 2)
-    sheet_surface_vertices = zeros(T, 3, N, 5)
+
+    midpath = (path1 + path2) / 2
+    unnormalized_tangents = hcat(midpath[:, 1:end-1] - midpath[:, 2:end], midpath[:, end-1] - midpath[:, end])
+    tangents = mapslices(normalize, unnormalized_tangents, dims=1)
+    almost_binormals = mapslices(normalize, midpath - path1, dims=1)
+    normals = stack(normalize!.(cross.(eachcol(tangents), eachcol(almost_binormals))))
+    binormals = stack(cross.(eachcol(normals), eachcol(tangents)))
+
+    cumulative_length_of_path = cumsum(norm.(eachcol(unnormalized_tangents)))
+    length_of_path = cumulative_length_of_path[end]
+    arrow_head_length = 4.0
+    arrow_body_length = length_of_path - arrow_head_length
+    l = findfirst(>(arrow_body_length), cumulative_length_of_path) / N
+    arrow = arrow_function(l, width, width*1.8)
+
+    surface_vertices = zeros(T, 3, N, 5)
     for idx in 1:N
-        point1 = path1[:, idx]
-        point2 = path2[:, idx]
-        three_path1_points = eachcol(@view(path1[:, min(max(begin,idx-1),end-2):min(max(begin,idx-1)+2,end)]))
-        three_path2_points = eachcol(@view(path2[:, min(max(begin,idx-1),end-2):min(max(begin,idx-1)+2,end)]))
+        midpoint = midpath[:, idx]
+        normal = normals[:, idx]
+        binormal = binormals[:, idx]
 
-        tangent1 = path_tangent(three_path1_points...)
-        binormal1 = normalize!(point1 - point2)
-        normal1 = normalize!(cross(binormal1, tangent1))
-
-        tangent2 = path_tangent(three_path2_points...)
-        binormal2 = normalize!(point2 - point1)
-        normal2 = normalize!(cross(binormal2, tangent2))
-
-        padding = width_pad .* binormal1
-
-        sheet_surface_vertices[:, idx, 1] = point1 .+ half_thickness .* normal1 .+ padding
-        sheet_surface_vertices[:, idx, 2] = point2 .- half_thickness .* normal2 .- padding
-        sheet_surface_vertices[:, idx, 3] = point2 .+ half_thickness .* normal2 .- padding
-        sheet_surface_vertices[:, idx, 4] = point1 .- half_thickness .* normal1 .+ padding
-        sheet_surface_vertices[:, idx, 5] = sheet_surface_vertices[:, idx, 1]
+        half_normal = half_thickness .* normal
+        arrow_vector = binormal * arrow((idx-1)/(N-1))
+        surface_vertices[:, idx, 1] = midpoint .+ half_normal .+ arrow_vector
+        surface_vertices[:, idx, 2] = midpoint .+ half_normal .- arrow_vector
+        surface_vertices[:, idx, 3] = midpoint .- half_normal .- arrow_vector
+        surface_vertices[:, idx, 4] = midpoint .- half_normal .+ arrow_vector
+        surface_vertices[:, idx, 5] = surface_vertices[:, idx, 1]
     end
-    return sheet_surface_vertices
-end
 
-function sheet(
-    points1::AbstractMatrix{T},
-    points2::AbstractMatrix{T};
-    thickness = 0.5,
-    width_pad = 0.0,
-    spline_quality = 4,
-    color_start = 0,
-    color_end = 1,
-    colorscheme::Union{ColorScheme, Symbol} = DEFAULT_COLORSCHEME,
-) where T <: Real
-    surface_vertices = sheet_surface(
-        points1, points2,
-        thickness=thickness, width_pad=width_pad, spline_quality=spline_quality)
-    colorscheme = colorscheme isa ColorScheme ? colorscheme : colorschemes[colorscheme]
-    color_matrix = repeat(colorscheme[LinRange(color_start, color_end, size(surface_vertices, 2))], inner=(spline_quality, 1))
-    return surface_vertices, color_matrix
+    surface_vertices[:, 1, :] .= midpath[:, 1]
+
+    return surface_vertices
 end
