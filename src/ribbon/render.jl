@@ -31,7 +31,7 @@ function render!(container, segment::Segment{Strand}, colors::Vector{<:RGB} = [c
     oxygen_coords_side2 = @view oxygen_coord_matrix(segment.backbone)[:, 2:2:end]
     coords1 = hcat(startpoint, oxygen_coords_side1, endpoint)
     coords2 = hcat(startpoint, oxygen_coords_side2, endpoint)
-    surface_vertices = arrow_surface(coords1, coords2, spline_quality=20, thickness=0.5)
+    surface_vertices = arrow_surface(coords1, coords2, width=1.1, thickness=0.3, spline_quality=20)
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)

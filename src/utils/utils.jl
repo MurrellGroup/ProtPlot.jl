@@ -1,3 +1,5 @@
+include("splines.jl")
+
 function remove_singleton_strands!(chain::Chain)
     ssvector = chain.ssvector
     for i in 2:length(ssvector)-1

@@ -132,7 +132,7 @@ function arrow_surface(
 
     cumulative_length_of_path = cumsum(norm.(eachcol(unnormalized_tangents)))
     length_of_path = cumulative_length_of_path[end]
-    arrow_head_length = 4.0
+    arrow_head_length = 3.0
     arrow_body_length = length_of_path - arrow_head_length
     l = findfirst(>(arrow_body_length), cumulative_length_of_path) / N
     arrow = arrow_function(l, width, width*1.8)
