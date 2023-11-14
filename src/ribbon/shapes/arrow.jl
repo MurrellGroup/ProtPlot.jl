@@ -1,0 +1,73 @@
+# uses surrounding points to move the ends of the paths slightly away from each other, if they are equal
+# such that the normals can be calculated correctly
+function deintersect_ends!(path1::AbstractMatrix{T}, path2::AbstractMatrix{T}) where T <: Real
+    @assert size(path1, 2) == size(path2, 2)
+    @assert size(path1, 1) >= 3
+    if path1[:,1] == path2[:,1]
+        next_binormal = path1[:,2] - path2[:,2]
+        path1[:,1] += next_binormal .* 0.1
+        path2[:,1] -= next_binormal .* 0.1
+    end
+    if path1[:,end] == path2[:,end]
+        prev_binormal = path1[:,end-1] - path2[:,end-1]
+        path1[:,end] += prev_binormal .* 0.1
+        path2[:,end] -= prev_binormal .* 0.1
+    end
+end
+
+# 0 <= t <= 1
+# l is the length of the arrow body
+# w is the width of the arrow body
+# W is the width of the arrow head
+# the length of the arrow head becomes 1 - l
+# the shape is normalized such that length of the entire arrow is 1
+arrow_function(l=0.5, w=0.5, W=1.0) = t -> t > l ? W*(t-1)/(l-1) : w
+
+function arrow_surface(
+    points1::AbstractMatrix{T},
+    points2::AbstractMatrix{T};
+    width = 1.0,
+    thickness = 0.3,
+    spline_quality = 10,
+) where T <: Real
+    half_thickness = thickness / 2
+    max_L = max(size(points1, 2), size(points2, 2))
+    path1 = spline(points1, N=max_L*spline_quality, k=min(3, size(points1, 2)-1))
+    path2 = spline(points2, N=max_L*spline_quality, k=min(3, size(points2, 2)-1))
+    deintersect_ends!(path1, path2) # this is a hack to make the normals work
+    @assert size(path1, 2) == size(path2, 2)
+    N = size(path1, 2)
+
+    midpath = (path1 + path2) / 2
+    unnormalized_tangents = hcat(midpath[:, 1:end-1] - midpath[:, 2:end], midpath[:, end-1] - midpath[:, end])
+    tangents = mapslices(normalize, unnormalized_tangents, dims=1)
+    almost_binormals = mapslices(normalize, midpath - path1, dims=1)
+    normals = stack(normalize!.(cross.(eachcol(tangents), eachcol(almost_binormals))))
+    binormals = stack(cross.(eachcol(normals), eachcol(tangents)))
+
+    cumulative_length_of_path = cumsum(norm.(eachcol(unnormalized_tangents)))
+    length_of_path = cumulative_length_of_path[end]
+    arrow_head_length = 3.0
+    arrow_body_length = length_of_path - arrow_head_length
+    l = findfirst(>(arrow_body_length), cumulative_length_of_path) / N
+    arrow = arrow_function(l, width, width*2.0)
+
+    surface_vertices = zeros(T, 3, N, 5)
+    for idx in 1:N
+        midpoint = midpath[:, idx]
+        normal = normals[:, idx]
+        binormal = binormals[:, idx]
+
+        half_normal = half_thickness .* normal
+        arrow_vector = binormal * arrow((idx-1)/(N-1))
+        surface_vertices[:, idx, 1] = midpoint .+ half_normal .+ arrow_vector
+        surface_vertices[:, idx, 2] = midpoint .+ half_normal .- arrow_vector
+        surface_vertices[:, idx, 3] = midpoint .- half_normal .- arrow_vector
+        surface_vertices[:, idx, 4] = midpoint .- half_normal .+ arrow_vector
+        surface_vertices[:, idx, 5] = surface_vertices[:, idx, 1]
+    end
+
+    surface_vertices[:, 1, :] .= midpath[:, 1]
+
+    return surface_vertices
+end

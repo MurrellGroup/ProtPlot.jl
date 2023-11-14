@@ -6,9 +6,9 @@ using Colors
 using ColorSchemes
 using LinearAlgebra
 
-include("utils/utils.jl")
+include("utils.jl")
+include("shapes/shapes.jl")
 include("segment.jl")
-include("shapes.jl")
 include("render.jl")
 
 end

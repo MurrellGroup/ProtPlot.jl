@@ -1,6 +1,10 @@
-export render, render!
+export ribbon, ribbon!
 
-function render!(container, segment::Segment{Loop}, colors::Vector{<:RGB} = [colorant"red", colorant"yellow"])
+function render!(
+    container,
+    segment::Segment{Loop},
+    colors::AbstractVector{<:RGB} = [colorant"red", colorant"yellow"],
+)
     extended_segment = extend_segment(segment, 0:length(segment)+1)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
@@ -13,7 +17,11 @@ function render!(container, segment::Segment{Loop}, colors::Vector{<:RGB} = [col
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(container, segment::Segment{Helix}, colors::Vector{<:RGB} = [colorant"lime", colorant"cyan"])
+function render!(
+    container,
+    segment::Segment{Helix},
+    colors::AbstractVector{<:RGB} = [colorant"lime", colorant"cyan"],
+)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
     controls = @view alphacarbon_coord_matrix(segment.backbone)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
@@ -24,7 +32,11 @@ function render!(container, segment::Segment{Helix}, colors::Vector{<:RGB} = [co
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(container, segment::Segment{Strand}, colors::Vector{<:RGB} = [colorant"blue", colorant"magenta"])
+function render!(
+    container,
+    segment::Segment{Strand},
+    colors::AbstractVector{<:RGB} = [colorant"blue", colorant"magenta"],
+)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
     oxygen_coords_side1 = @view oxygen_coord_matrix(segment.backbone)[:, 1:2:end-1]
@@ -37,7 +49,11 @@ function render!(container, segment::Segment{Strand}, colors::Vector{<:RGB} = [c
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
 end
 
-function render!(container, chain::Chain, colors::Vector{<:RGB})
+function render!(
+    container,
+    chain::Chain,
+    colors::AbstractVector{<:RGB},
+)
     @assert length(chain) == length(colors)
     @assert !has_missing_ss(chain)
     for segment in segments(chain)
@@ -45,7 +61,11 @@ function render!(container, chain::Chain, colors::Vector{<:RGB})
     end
 end
 
-function render!(container, protein::Protein, color_vectors::Vector{<:Vector{<:RGB}})
+function ribbon!(
+    container,
+    protein::Protein,
+    color_vectors::AbstractVector{<:AbstractVector{<:RGB}},
+)
     has_missing_ss(protein) && assign_secondary_structure!(protein)
     remove_singleton_strands!.(protein)
     @assert length(protein) == length(color_vectors)
@@ -55,16 +75,21 @@ function render!(container, protein::Protein, color_vectors::Vector{<:Vector{<:R
     end
 end
 
-function render!(container, protein::Protein, float_color_vectors::Vector{<:Vector{<:AbstractFloat}}, colorscheme::ColorScheme = ColorSchemes.jet)
+function ribbon!(
+    container,
+    protein::Protein,
+    float_color_vectors::AbstractVector{<:AbstractVector{<:AbstractFloat}},
+    colorscheme::ColorScheme = ColorSchemes.jet,
+)
     color_vectors = [colorscheme[float_color_vector] for float_color_vector in float_color_vectors]
-    render!(container, protein, color_vectors)
+    ribbon!(container, protein, color_vectors)
 end
 
-function render(protein::Protein)
+function ribbon(protein::Protein)
     scene = Scene(backgroundcolor=:black)#, axis=(;type=Axis3, aspect=:data))
     cam3d!(scene)
     color_vectors = [chain_color_vector(chain, colorschemes[:jet]) for chain in protein]
-    render!(scene, protein, color_vectors)
+    ribbon!(scene, protein, color_vectors)
     center!(scene)
     display(scene)
 end

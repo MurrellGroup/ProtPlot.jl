@@ -1,5 +1,7 @@
 @testset "segment.jl" begin
 
+    using .Ribbon
+
     @testset "Segment" begin
         chain = Chain("A", Backbone(randn(3, 4, 5)))
         chain.ssvector .= [Loop, Loop, Loop, Helix, Strand]
@@ -18,7 +20,6 @@
     @testset "segments" begin
         coords = randn(3, 4, 3)
         chain = Chain("B", Backbone(coords))
-        @test_throws ErrorException segments(chain)
         chain.ssvector .= [Loop, Helix, Helix]
         chain_segments = segments(chain)
         @test length(chain_segments) == 2

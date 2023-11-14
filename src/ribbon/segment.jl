@@ -51,14 +51,6 @@ This function is useful if one wishes to access the coordinates of the atoms of 
     return Segment{MiSSing}(segment.chain, adjusted_range)
 end
 
-function clean_ssvector!(ssvector::Vector{SS}) where SS
-    for i in 2:length(ssvector)-1
-        if ssvector[i-1] == Loop && ssvector[i] == Strand && ssvector[i+1] == Loop
-            ssvector[i] = Loop
-        end
-    end
-end
-
 """
     segments(chain)
 

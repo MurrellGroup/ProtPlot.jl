@@ -5,6 +5,7 @@ export Backboner
 
 include("ribbon/ribbon.jl")
 
-export Ribbon
+import .Ribbon: ribbon, ribbon!
+export ribbon, ribbon!
 
 end

@@ -1,6 +1,10 @@
 using ProtPlot
 using Test
 
+using Backboner
+
 @testset "ProtPlot.jl" begin
-    # Write your tests here.
+
+    include("ribbon/ribbon.jl")
+
 end
