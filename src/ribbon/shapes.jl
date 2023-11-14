@@ -22,26 +22,26 @@ function tube_surface(
     surface_vertices = zeros(T, 3, N, length(tube_angles))
 
     # Precompute tangents and initialize normals
-    tangents = [path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N]
+    tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N)
     normals = zeros(T, 3, N)
 
     # Initial normal vector (arbitrary, but not aligned with the first tangent)
-    normals[:, 1] = abs(tangents[1][1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
+    normals[:, 1] = abs(tangents[1, 1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
 
     # Propagate the normal vector along the path
     for idx in 2:N
         prev_normal = normals[:, idx-1]
-        t = tangents[idx]
+        t = tangents[:, idx]
         projected_normal = prev_normal - dot(t, prev_normal) * t
         if norm(projected_normal) < 1e-5
-            projected_normal = cross(tangents[idx - 1], t)
+            projected_normal = cross(tangents[:, idx - 1], t)
         end
         normals[:, idx] = normalize!(projected_normal)
     end
 
     # Generate surface vertices
     for idx in 1:N
-        t = tangents[idx]
+        t = tangents[:, idx]
         n = normals[:, idx]
         b = cross(n, t)
 
@@ -108,6 +108,8 @@ end
 # the shape is normalized such that length of the entire arrow is 1
 arrow_function(l=0.5, w=0.5, W=1.0) = t -> t > l ? W*(t-1)/(l-1) : w
 
+# TODO: just use oxygen atoms for calculating paths
+
 function arrow_surface(
     points1::AbstractMatrix{T},
     points2::AbstractMatrix{T};
@@ -135,7 +137,7 @@ function arrow_surface(
     arrow_head_length = 3.0
     arrow_body_length = length_of_path - arrow_head_length
     l = findfirst(>(arrow_body_length), cumulative_length_of_path) / N
-    arrow = arrow_function(l, width, width*1.8)
+    arrow = arrow_function(l, width, width*2.0)
 
     surface_vertices = zeros(T, 3, N, 5)
     for idx in 1:N

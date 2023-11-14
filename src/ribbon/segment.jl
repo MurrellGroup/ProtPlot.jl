@@ -85,6 +85,8 @@ function segments(chain::Chain)
 end
 
 
+# utilities
+
 function segment_startpoint(segment::Segment, A=1) # nitrogen
     return segment.backbone.coords[:,A,1] # first residue
 end
@@ -95,5 +97,14 @@ function segment_endpoint(segment::Segment, A=1) # nitrogen
         return segment.chain.backbone[:,3,segment_stop] # carbon of last residue
     else
         return segment.chain.backbone[:,A,segment_stop+1] # next residue
+    end
+end
+
+function remove_singleton_strands!(chain::Chain)
+    ssvector = chain.ssvector
+    for i in 2:length(ssvector)-1
+        if ssvector[i-1] != Strand && ssvector[i] == Strand && ssvector[i+1] != Strand
+            ssvector[i] = Loop
+        end
     end
 end

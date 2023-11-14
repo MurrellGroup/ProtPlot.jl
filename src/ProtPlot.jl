@@ -1,13 +1,10 @@
 module ProtPlot
 
-using Backboner
+import Backboner
 export Backboner
 
-using GLMakie
-using Colors, ColorSchemes
-using LinearAlgebra
-
-include("utils/utils.jl")
 include("ribbon/ribbon.jl")
+
+export Ribbon
 
 end

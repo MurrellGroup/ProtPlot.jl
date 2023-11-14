@@ -1,14 +1,3 @@
-include("splines.jl")
-
-function remove_singleton_strands!(chain::Chain)
-    ssvector = chain.ssvector
-    for i in 2:length(ssvector)-1
-        if ssvector[i-1] != Strand && ssvector[i] == Strand && ssvector[i+1] != Strand
-            ssvector[i] = Loop
-        end
-    end
-end
-
 # expand vector to have length N while keeping the same discrete color gradient 
 function expand_colors(colors::Vector, N::Integer)
     L = length(colors)
