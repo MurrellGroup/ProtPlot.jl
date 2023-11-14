@@ -85,11 +85,19 @@ function ribbon!(
     ribbon!(container, protein, color_vectors)
 end
 
+function ribbon!(
+    container,
+    protein::Protein,
+    colorscheme::ColorScheme = ColorSchemes.jet,
+)
+    color_vectors = [chain_color_vector(chain, colorscheme) for chain in protein]
+    ribbon!(container, protein, color_vectors)
+end
+
 function ribbon(protein::Protein)
     scene = Scene(backgroundcolor=:black)#, axis=(;type=Axis3, aspect=:data))
     cam3d!(scene)
-    color_vectors = [chain_color_vector(chain, colorschemes[:jet]) for chain in protein]
-    ribbon!(scene, protein, color_vectors)
+    ribbon!(scene, protein)
     center!(scene)
     display(scene)
 end
