@@ -8,9 +8,9 @@ function render!(
     extended_segment = extend_segment(segment, 0:length(segment)+1)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    controls = @view alphacarbon_coord_matrix(segment.backbone)[:, 2:end]
+    controls = @view alphacarbon_coord_matrix(segment.backbone)[:, (isone(end) ? 1 : 2):end]
     coords = [startpoint controls endpoint]
-    surface_vertices = tube_surface(coords, 0.3, spline_quality=20, tube_quality=20,
+    surface_vertices = tube_surface(coords, 0.25, spline_quality=20, tube_quality=20,
         ghost_control_start=segment_startpoint(extended_segment), ghost_control_end=segment_endpoint(extended_segment))
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
@@ -43,7 +43,7 @@ function render!(
     oxygen_coords_side2 = @view oxygen_coord_matrix(segment.backbone)[:, 2:2:end]
     coords1 = hcat(startpoint, oxygen_coords_side1, endpoint)
     coords2 = hcat(startpoint, oxygen_coords_side2, endpoint)
-    surface_vertices = arrow_surface(coords1, coords2, width=1.1, thickness=0.3, spline_quality=20)
+    surface_vertices = arrow_surface(coords1, coords2, width=1.1, thickness=0.5, spline_quality=20)
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
