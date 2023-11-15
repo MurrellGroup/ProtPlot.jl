@@ -90,7 +90,7 @@ function ribbon!(
     protein::Protein,
     colorscheme::ColorScheme = ColorSchemes.jet,
 )
-    color_vectors = [chain_color_vector(chain, colorscheme) for chain in protein]
+    color_vectors = [smooth_color_vector(colorscheme, length(chain)) for chain in protein]
     ribbon!(container, protein, color_vectors)
 end
 
