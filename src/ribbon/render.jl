@@ -96,7 +96,7 @@ end
 
 function ribbon(
     protein::Protein,
-    color_vectors::ColorScheme = [smooth_color_vector(colorscheme, length(chain)) for chain in protein],
+    color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [smooth_color_vector(colorscheme, length(chain)) for chain in protein],
 )
     scene = Scene(backgroundcolor=:black)
     cam3d!(scene)
