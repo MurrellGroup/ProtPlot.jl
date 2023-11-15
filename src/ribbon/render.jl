@@ -67,7 +67,7 @@ function ribbon!(
     color_vectors::AbstractVector{<:AbstractVector{<:RGB}},
 )
     has_missing_ss(protein) && assign_secondary_structure!(protein)
-    remove_singleton_strands!.(protein)
+    remove_singleton_strands!.(protein) # TODO: don't mutate
     @assert length(protein) == length(color_vectors)
     @assert length.(protein) == length.(color_vectors)
     for (chain, colors) in zip(protein, color_vectors)
@@ -94,10 +94,13 @@ function ribbon!(
     ribbon!(container, protein, color_vectors)
 end
 
-function ribbon(protein::Protein)
-    scene = Scene(backgroundcolor=:black)#, axis=(;type=Axis3, aspect=:data))
+function ribbon(
+    protein::Protein,
+    color_vectors::ColorScheme = [smooth_color_vector(colorscheme, length(chain)) for chain in protein],
+)
+    scene = Scene(backgroundcolor=:black)
     cam3d!(scene)
-    ribbon!(scene, protein)
+    ribbon!(scene, protein, color_vectors)
     center!(scene)
     display(scene)
 end
