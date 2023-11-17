@@ -4,7 +4,7 @@ export Segment, extend_segment, segments
     Segment{SS, T}
 
 A segment of a chain with uniform secondary structure.
-The segment can have mixed secondary structure if the `SS` type parameter is `MiSSing`.
+The segment can have mixed secondary structure if the `SS` type parameter is `Unassigned`.
 """
 struct Segment{SS, T}
     chain::Chain{T}
@@ -13,13 +13,13 @@ struct Segment{SS, T}
 
     function Segment{SS}(chain::Chain{T}, range::UnitRange{Int}) where {SS, T}
         ssvector = view(chain.ssvector, range)
-        @assert SS == MiSSing || all(==(SS), ssvector) "All residues in the '$SS' segment must have the '$SS' secondary structure"
+        @assert SS == Unassigned || all(==(SS), ssvector) "All residues in the '$SS' segment must have the '$SS' secondary structure"
         backbone = chain.backbone[range]
         return new{SS, T}(chain, range, backbone)
     end
 
     function Segment(chain::Chain{T}, range::UnitRange{Int}) where T
-        SS = allequal(ssvector) ? ssvector[1] : MiSSing
+        SS = allequal(ssvector) ? ssvector[1] : Unassigned
         return Segment{SS}(chain, range)
     end
 end
@@ -48,7 +48,7 @@ This function is useful if one wishes to access the coordinates of the atoms of 
     parent_vec_range = range .+ offset
     adjusted_range = max(1, parent_vec_range.start):min(length(segment.chain), parent_vec_range.stop)
     #checkbounds(segment.chain.backbone, parent_vec_range)
-    return Segment{MiSSing}(segment.chain, adjusted_range)
+    return Segment{Unassigned}(segment.chain, adjusted_range)
 end
 
 """

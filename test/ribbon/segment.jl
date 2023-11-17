@@ -14,7 +14,7 @@
         chain = Chain("A", Backbone(randn(3, 4, 5)))
         chain.ssvector .= [Loop, Helix, Strand, Strand, Helix]
         segment = Segment{Strand}(chain, 3:4)
-        @test extend_segment(segment, 0:3) == Segment{MiSSing}(chain, 2:5)
+        @test extend_segment(segment, 0:3) == Segment{Unassigned}(chain, 2:5)
     end
 
     @testset "segments" begin
