@@ -6,9 +6,11 @@ on:
     tags: ['*']
   pull_request:
   workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -18,10 +20,12 @@ jobs:
       matrix:
         version:
           - '1.9'
+          - 'nightly'
         os:
           - ubuntu-latest
         arch:
           - x64
+
     steps:
       - uses: actions/checkout@v3
       - uses: julia-actions/setup-julia@v1
@@ -29,34 +33,18 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
 
-      - name: Cache Julia packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.julia
-          key: ${{ runner.os }}-julia-${{ matrix.version }}-${{ hashFiles('**/Project.toml', '**/Manifest.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-julia-${{ matrix.version }}-
-            ${{ runner.os }}-julia-
-      
-      - name: Install Xvfb
-        run: sudo apt-get install -y xvfb
+      - uses: julia-actions/cache@v1
 
-      - name: Create script for tests with Xvfb
-        run: |
-          echo '#!/bin/bash' > run_tests.sh
-          echo 'export JULIA_PKG_SERVER=""' >> run_tests.sh
-          echo 'export JULIA_NUM_THREADS=1' >> run_tests.sh
-          echo 'julia --project --code-coverage=user -e "using Pkg; Pkg.test()"' >> run_tests.sh
-          chmod +x run_tests.sh
-      - name: Install Coverage.jl
-        run: julia --project -e 'using Pkg; Pkg.add("Coverage")'
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+
+      - name: Install Julia dependencies
+        run: julia --project -e 'using Pkg; Pkg.instantiate()'
 
       - name: Run tests with Xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" ./run_tests.sh
+        run: xvfb-run -a -s '-screen 0 1024x768x24' julia --project -e 'using Pkg; Pkg.test(coverage=true)'
 
-      - name: Process coverage with Coverage.jl
-        run: julia --project -e 'using Coverage; LCOV.writefile("lcov.info", process_folder())'
-
+      - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v3
         with:
           files: lcov.info
