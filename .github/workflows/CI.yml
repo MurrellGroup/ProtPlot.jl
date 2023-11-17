@@ -24,22 +24,12 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v3
-
-      # Cache step
-      - name: Cache Julia packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.julia
-          key: ${{ runner.os }}-julia-${{ matrix.version }}-${{ hashFiles('**/Project.toml', '**/Manifest.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-julia-${{ matrix.version }}-
-            ${{ runner.os }}-julia-
-
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
 
+      - uses: julia-actions/cache@v1
       - name: Install Xvfb
         run: sudo apt-get install -y xvfb
 
