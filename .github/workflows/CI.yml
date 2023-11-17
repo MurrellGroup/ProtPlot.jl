@@ -37,13 +37,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-julia-${{ matrix.version }}-
             ${{ runner.os }}-julia-
+      
       - name: Install Xvfb
         run: sudo apt-get install -y xvfb
 
+      - name: Create script for tests with Xvfb
+        run: |
+          echo '#!/bin/bash' > run_tests.sh
+          echo 'export JULIA_PKG_SERVER=""' >> run_tests.sh
+          echo 'export JULIA_NUM_THREADS=1' >> run_tests.sh
+          echo 'julia --project --code-coverage=user -e "using Pkg; Pkg.test()"' >> run_tests.sh
+          chmod +x run_tests.sh
+      
       - name: Run tests with Xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
-
-      - uses: julia-actions/julia-processcoverage@v1
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1024x768x24" ./run_tests.sh
+      
+      - name: Process coverage with Coverage.jl
+        run: julia --project -e 'using Coverage; LCOV.writefile("lcov.info", process_folder())'
 
       - uses: codecov/codecov-action@v3
         with:
