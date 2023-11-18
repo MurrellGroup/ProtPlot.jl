@@ -70,9 +70,10 @@ end
 function render!(
     container,
     protein::Protein;
-    colorscheme::ColorScheme = ColorSchemes.jet,
+    colorscheme::Union{ColorScheme, Symbol} = :jet,
     color_vectors::AbstractVector{C} = [LinRange(0, 1, length(chain)) for chain in protein],
 ) where C <: AbstractVector{<:Union{Real, RGB}}
+    colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
     if eltype(C) <: Real
         color_vectors = [colorscheme[color_vector] for color_vector in color_vectors]
     end
