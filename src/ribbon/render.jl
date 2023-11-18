@@ -1,5 +1,3 @@
-export ribbon, ribbon!
-
 function render!(
     container,
     segment::Segment{Loop},
@@ -15,6 +13,8 @@ function render!(
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+
+    return container
 end
 
 function render!(
@@ -30,6 +30,8 @@ function render!(
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+
+    return container
 end
 
 function render!(
@@ -47,6 +49,8 @@ function render!(
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 
     surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+
+    return container
 end
 
 function render!(
@@ -59,13 +63,19 @@ function render!(
     for segment in segments(chain)
         render!(container, segment, colors[segment.range])
     end
+
+    return container
 end
 
-function ribbon!(
+function render!(
     container,
-    protein::Protein,
-    color_vectors::AbstractVector{<:AbstractVector{<:RGB}},
-)
+    protein::Protein;
+    colorscheme::ColorScheme = ColorSchemes.jet,
+    color_vectors::AbstractVector{C} = [LinRange(0, 1, length(chain)) for chain in protein],
+) where C <: AbstractVector{<:Union{Real, RGB}}
+    if eltype(C) <: Real
+        color_vectors = [colorscheme[color_vector] for color_vector in color_vectors]
+    end
     has_missing_ss(protein) && assign_secondary_structure!(protein)
     remove_singleton_strands!.(protein) # TODO: don't mutate
     @assert length(protein) == length(color_vectors)
@@ -73,34 +83,6 @@ function ribbon!(
     for (chain, colors) in zip(protein, color_vectors)
         render!(container, chain, colors)
     end
-end
 
-function ribbon!(
-    container,
-    protein::Protein,
-    float_color_vectors::AbstractVector{<:AbstractVector{<:AbstractFloat}},
-    colorscheme::ColorScheme = ColorSchemes.jet,
-)
-    color_vectors = [colorscheme[float_color_vector] for float_color_vector in float_color_vectors]
-    ribbon!(container, protein, color_vectors)
-end
-
-function ribbon!(
-    container,
-    protein::Protein,
-    colorscheme::ColorScheme = ColorSchemes.jet,
-)
-    color_vectors = [smooth_color_vector(colorscheme, length(chain)) for chain in protein]
-    ribbon!(container, protein, color_vectors)
-end
-
-function ribbon(
-    protein::Protein,
-    color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [smooth_color_vector(colorscheme, length(chain)) for chain in protein],
-)
-    scene = Scene(backgroundcolor=:black)
-    cam3d!(scene)
-    ribbon!(scene, protein, color_vectors)
-    center!(scene)
-    display(scene)
+    return container
 end

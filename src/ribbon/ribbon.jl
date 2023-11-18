@@ -24,6 +24,8 @@ Keyword arguments:
 """
 function ribbon!(container, protein::Protein; kwargs...)
     render!(container, protein, kwargs...)
+
+    return container
 end
 
 """
@@ -35,9 +37,10 @@ See `render!` for keyword arguments.
 function ribbon(protein::Protein; kwargs...)
     scene = Scene(backgroundcolor=:black)
     cam3d!(scene)
-    render!(scene, protein; kwargs...)
+    ribbon!(scene, protein; kwargs...)
     center!(scene)
     display(scene)
+    return scene
 end
 
 end
