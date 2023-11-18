@@ -23,7 +23,7 @@ Keyword arguments:
     The vectors must be either vectors of real number between 0 and 1, or vectors of RGB colors.
 """
 function ribbon!(container, protein::Protein; kwargs...)
-    render!(container, protein, kwargs...)
+    render!(container, protein; kwargs...)
 
     return container
 end
@@ -34,8 +34,8 @@ end
 Renders a protein as a ribbon diagram.
 See `render!` for keyword arguments.
 """
-function ribbon(protein::Protein; kwargs...)
-    scene = Scene(backgroundcolor=:black)
+function ribbon(protein::Protein; backgroundcolor=:black, kwargs...)
+    scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene)
     ribbon!(scene, protein; kwargs...)
     center!(scene)
