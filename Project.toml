@@ -1,7 +1,7 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
 authors = ["Anton Oresten"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 Backboner = "9ac9c2a2-1cfe-46d3-b3fd-6fa470ea56a7"
@@ -12,7 +12,7 @@ GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [compat]
-Backboner = "0.2"
+Backboner = "0.3"
 ColorSchemes = "3"
 Colors = "^0.12"
 Dierckx = "^0.5"

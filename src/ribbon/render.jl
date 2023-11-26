@@ -1,6 +1,6 @@
 function render!(
     container,
-    segment::Segment{Loop},
+    segment::Segment{Coil},
     colors::AbstractVector{<:RGB} = [colorant"red", colorant"yellow"];
     radius = 0.25,
     spline_quality = 20,
@@ -10,9 +10,9 @@ function render!(
     extended_segment = extend_segment(segment, 0:length(segment)+1)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    controls = @view alphacarbon_coord_matrix(segment.backbone)[:, (isone(end) ? 1 : 2):end]
+    controls = @view acarbon_coord_matrix(segment.backbone)[:, (isone(end) ? 1 : 2):end]
     coords = [startpoint controls endpoint]
-    surface_vertices = tube_surface(coords,
+    surface_vertices = coil_surface(coords,
         radius=radius, spline_quality=spline_quality, slice_quality=slice_quality,
         ghost_control_start=segment_startpoint(extended_segment), ghost_control_end=segment_endpoint(extended_segment)
     )
@@ -36,7 +36,7 @@ function render!(
 )
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    controls = @view alphacarbon_coord_matrix(segment.backbone)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
+    controls = @view acarbon_coord_matrix(segment.backbone)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
     coords = hcat(startpoint, controls, endpoint)
     surface_vertices = helix_surface(coords,
         radius=helix_radius, width_factor=helix_width, thickness_factor=helix_thickness,
@@ -81,7 +81,7 @@ function render!(
     kwargs...
 )
     @assert length(chain) == length(colors)
-    @assert !has_missing_ss(chain)
+    @assert has_assigned_ss(chain)
     for segment in segments(chain)
         render!(container, segment, colors[segment.range]; kwargs...)
     end
@@ -96,12 +96,11 @@ function render!(
     color_vectors::AbstractVector{C} = [LinRange(0, 1, length(chain)) for chain in protein],
     kwargs...
 ) where C <: AbstractVector{<:Union{Real, RGB}}
+    @assert has_assigned_ss(protein) "Protein must have assigned secondary structure."
     colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
     if eltype(C) <: Real
         color_vectors = [colorscheme[color_vector] for color_vector in color_vectors]
     end
-    has_missing_ss(protein) && assign_secondary_structure!(protein)
-    remove_singleton_strands!.(protein) # TODO: don't mutate
     @assert length(protein) == length(color_vectors)
     @assert length.(protein) == length.(color_vectors)
     for (chain, colors) in zip(protein, color_vectors)

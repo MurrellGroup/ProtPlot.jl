@@ -7,6 +7,7 @@ using ColorSchemes
 using LinearAlgebra
 
 include("utils.jl")
+include("secondarystructure.jl")
 include("shapes/shapes.jl")
 include("segment.jl")
 include("render.jl")
@@ -23,7 +24,15 @@ Keyword arguments:
     The vectors must be either vectors of real number between 0 and 1, or vectors of RGB colors.
 """
 function ribbon!(container, protein::Protein; kwargs...)
-    render!(container, protein; kwargs...)
+    protein_assigned = if has_assigned_ss(protein) # the function should probably be called `fully_assigned_ss` or something -- "has" is ambiguous
+        protein
+    else
+        @debug """The given protein has one or more residues with unassigned secondary structure.
+        Copying the protein and assigning secondary structure to the copy...
+        This can be avoided by calling `assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""
+        assign_secondary_structure(protein)
+    end
+    render!(container, protein_assigned; kwargs...)
 
     return container
 end

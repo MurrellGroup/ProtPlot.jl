@@ -19,3 +19,8 @@ function expand_colors(colors::Vector, N::Integer)
 
     return reshape(result[1:N], :, 1)
 end
+
+nitrogen_coord_matrix(backbone::Backbone) = Backboner.atom_coord_matrix(backbone, 1)
+acarbon_coord_matrix(backbone::Backbone) = Backboner.atom_coord_matrix(backbone, 2)
+carbon_coord_matrix(backbone::Backbone) = Backboner.atom_coord_matrix(backbone, 3)
+oxygen_coord_matrix(backbone::Backbone) = Backboner.atom_coord_matrix(backbone, 4)

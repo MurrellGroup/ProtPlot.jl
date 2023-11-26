@@ -1,4 +1,4 @@
-function tube_surface(
+function coil_surface(
     points::AbstractMatrix{T};
     radius = 1.0,
     spline_quality = 20,
@@ -15,8 +15,8 @@ function tube_surface(
     end
 
     N = size(path, 2)
-    tube_angles = LinRange(0, 2π, slice_quality)
-    surface_vertices = zeros(T, 3, N, length(tube_angles))
+    angles = LinRange(0, 2π, slice_quality)
+    surface_vertices = zeros(T, 3, N, length(angles))
 
     # Precompute tangents and initialize normals
     tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N)
@@ -42,7 +42,7 @@ function tube_surface(
         n = normals[:, idx]
         b = cross(n, t)
 
-        for (jdx, angle) in enumerate(tube_angles)
+        for (jdx, angle) in enumerate(angles)
             offset = radius * (cos(angle) * n + sin(angle) * b)
             surface_vertices[:, idx, jdx] = path[:, idx] + offset
         end

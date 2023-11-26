@@ -1,25 +1,25 @@
 export Segment, extend_segment, segments
 
 """
-    Segment{SS, T}
+    Segment{SS}
 
 A segment of a chain with uniform secondary structure.
-The segment can have mixed secondary structure if the `SS` type parameter is `Unassigned`.
 """
-struct Segment{SS, T}
-    chain::Chain{T}
+struct Segment{SS}
+    chain::Chain
     range::UnitRange{Int}
-    backbone::Backbone{4,T}
+    backbone::Backbone{4}
 
-    function Segment{SS}(chain::Chain{T}, range::UnitRange{Int}) where {SS, T}
+    function Segment{SS}(chain::Chain, range::UnitRange{Int}) where SS
         ssvector = view(chain.ssvector, range)
-        @assert SS == Unassigned || all(==(SS), ssvector) "All residues in the '$SS' segment must have the '$SS' secondary structure"
+        ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
+        @assert SS == Unassigned || all(==(SS), ss_class_vector) "All residues in the '$SS' segment must have the '$SS' secondary structure"
         backbone = chain.backbone[range]
-        return new{SS, T}(chain, range, backbone)
+        return new{SS}(chain, range, backbone)
     end
 
-    function Segment(chain::Chain{T}, range::UnitRange{Int}) where T
-        SS = allequal(ssvector) ? ssvector[1] : Unassigned
+    function Segment(chain::Chain, range::UnitRange{Int})
+        SS = SS_CLASS_DICT[chain.ssvector[range][1]]
         return Segment{SS}(chain, range)
     end
 end
@@ -47,7 +47,6 @@ This function is useful if one wishes to access the coordinates of the atoms of 
     offset = segment.range.start - 1
     parent_vec_range = range .+ offset
     adjusted_range = max(1, parent_vec_range.start):min(length(segment.chain), parent_vec_range.stop)
-    #checkbounds(segment.chain.backbone, parent_vec_range)
     return Segment{Unassigned}(segment.chain, adjusted_range)
 end
 
@@ -59,20 +58,21 @@ The segments are defined by the secondary structure of the residues.
 A chain with missing secondary structure information will throw an error.
 """
 function segments(chain::Chain)
-    has_missing_ss(chain) && @warn "Chain $(chain.id) has missing secondary structure information"
+    !has_assigned_ss(chain) && @warn "Chain $(chain.id) has missing secondary structure information"
 
     ssvector = chain.ssvector
+    ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
     start_idx = 1
     end_idx = 1
     segments = Segment[]
-    for (i, ss) in enumerate(ssvector)
-        if ss != ssvector[start_idx]
-            push!(segments, Segment{ssvector[start_idx]}(chain, start_idx:end_idx))
+    for (i, ss) in enumerate(ss_class_vector)
+        if ss != ss_class_vector[start_idx]
+            push!(segments, Segment{ss_class_vector[start_idx]}(chain, start_idx:end_idx))
             start_idx = i
         end
         end_idx = i
     end
-    push!(segments, Segment{ssvector[start_idx]}(chain, start_idx:end_idx))
+    push!(segments, Segment{ss_class_vector[start_idx]}(chain, start_idx:end_idx))
     return segments
 end
 
@@ -89,14 +89,5 @@ function segment_endpoint(segment::Segment, A=1) # nitrogen
         return segment.chain.backbone[:,3,segment_stop] # carbon of last residue
     else
         return segment.chain.backbone[:,A,segment_stop+1] # next residue
-    end
-end
-
-function remove_singleton_strands!(chain::Chain)
-    ssvector = chain.ssvector
-    for i in 2:length(ssvector)-1
-        if ssvector[i-1] != Strand && ssvector[i] == Strand && ssvector[i+1] != Strand
-            ssvector[i] = Loop
-        end
     end
 end
