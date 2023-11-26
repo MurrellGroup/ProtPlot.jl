@@ -1,9 +1,9 @@
 function tube_surface(
-    points::AbstractMatrix{T},
-    radius::Real = 0.5;
-    spline_quality = 10,
-    tube_quality = 20,
-    ghost_control_start = nothing, # don't seem to be working -- should make ends of the tube line up with the next segment so it looks nicer
+    points::AbstractMatrix{T};
+    radius = 1.0,
+    spline_quality = 20,
+    slice_quality = 20,
+    ghost_control_start = nothing,
     ghost_control_end = nothing,
 ) where T <: Real
 
@@ -15,7 +15,7 @@ function tube_surface(
     end
 
     N = size(path, 2)
-    tube_angles = LinRange(0, 2π, tube_quality)
+    tube_angles = LinRange(0, 2π, slice_quality)
     surface_vertices = zeros(T, 3, N, length(tube_angles))
 
     # Precompute tangents and initialize normals

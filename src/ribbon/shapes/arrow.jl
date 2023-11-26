@@ -21,14 +21,16 @@ end
 # W is the width of the arrow head
 # the length of the arrow head becomes 1 - l
 # the shape is normalized such that length of the entire arrow is 1
-arrow_function(l=0.5, w=0.5, W=1.0) = t -> t > l ? W*(t-1)/(l-1) : w
+arrow_function(l=0.5, w=0.5, W=1.0) = let hw = w/2, hW = W/2 
+    t -> t > l ? hW*(t-1)/(l-1) : hw
+end
 
 function arrow_surface(
     points1::AbstractMatrix{T},
     points2::AbstractMatrix{T};
     width = 1.0,
     thickness = 0.3,
-    spline_quality = 10,
+    spline_quality = 20,
 ) where T <: Real
     half_thickness = thickness / 2
     max_L = max(size(points1, 2), size(points2, 2))
