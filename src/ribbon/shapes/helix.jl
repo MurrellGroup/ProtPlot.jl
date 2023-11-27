@@ -7,6 +7,7 @@ function helix_surface(
     thickness_factor = 1.0,
     spline_quality = 20,
     slice_quality = 20,
+    kwargs...
 ) where T <: Real
     path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
     N = size(path, 2)

@@ -12,9 +12,10 @@ function render!(
     endpoint = segment_endpoint(segment)
     controls = @view acarbon_coord_matrix(segment.backbone)[:, (isone(end) ? 1 : 2):end]
     coords = [startpoint controls endpoint]
-    surface_vertices = coil_surface(coords,
+    surface_vertices = coil_surface(coords;
         radius=radius, spline_quality=spline_quality, slice_quality=slice_quality,
-        ghost_control_start=segment_startpoint(extended_segment), ghost_control_end=segment_endpoint(extended_segment)
+        ghost_control_start=segment_startpoint(extended_segment), ghost_control_end=segment_endpoint(extended_segment),
+        kwargs...
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
@@ -38,9 +39,10 @@ function render!(
     endpoint = segment_endpoint(segment)
     controls = @view acarbon_coord_matrix(segment.backbone)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
     coords = hcat(startpoint, controls, endpoint)
-    surface_vertices = helix_surface(coords,
+    surface_vertices = helix_surface(coords;
         radius=helix_radius, width_factor=helix_width, thickness_factor=helix_thickness,
         spline_quality=spline_quality, slice_quality=slice_quality,
+        kwargs...
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
@@ -64,8 +66,9 @@ function render!(
     oxygen_coords_side2 = @view oxygen_coord_matrix(segment.backbone)[:, 2:2:end]
     coords1 = hcat(startpoint, oxygen_coords_side1, endpoint)
     coords2 = hcat(startpoint, oxygen_coords_side2, endpoint)
-    surface_vertices = arrow_surface(coords1, coords2,
+    surface_vertices = arrow_surface(coords1, coords2;
         width=strand_width, thickness=strand_thickness, spline_quality=spline_quality,
+        kwargs...
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 

@@ -30,7 +30,10 @@ function arrow_surface(
     points2::AbstractMatrix{T};
     width = 1.0,
     thickness = 0.3,
+    arrow_head_length = 3.5,
+    arrow_head_width = 2*width,
     spline_quality = 20,
+    kwargs...
 ) where T <: Real
     if size(points1, 2) > 3 && size(points2, 2) > 3
         points1 = points1[:, [1:end-2; end]]
@@ -53,10 +56,9 @@ function arrow_surface(
 
     cumulative_length_of_path = cumsum(norm.(eachcol(unnormalized_tangents)))
     length_of_path = cumulative_length_of_path[end]
-    arrow_head_length = 3.0
     arrow_body_length = length_of_path - arrow_head_length
     l = findfirst(>(arrow_body_length), cumulative_length_of_path) / N
-    arrow = arrow_function(l, width, width*2.0)
+    arrow = arrow_function(l, width, arrow_head_width)
 
     surface_vertices = zeros(T, 3, N, 5)
     for idx in 1:N

@@ -5,6 +5,7 @@ function coil_surface(
     slice_quality = 20,
     ghost_control_start = nothing,
     ghost_control_end = nothing,
+    kwargs...
 ) where T <: Real
 
     path = if !isnothing(ghost_control_start) && !isnothing(ghost_control_end)
