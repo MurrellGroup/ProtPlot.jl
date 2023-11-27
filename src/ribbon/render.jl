@@ -92,15 +92,11 @@ end
 function render!(
     container,
     protein::Protein;
-    colorscheme::Union{ColorScheme, Symbol} = :jet,
-    color_vectors::AbstractVector{C} = [LinRange(0, 1, length(chain)) for chain in protein],
+    colorscheme::ColorScheme = colorschemes[default_colorscheme],
+    color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [colorscheme[LinRange(0, 1, length(chain))] for chain in protein],
     kwargs...
-) where C <: AbstractVector{<:Union{Real, RGB}}
+)
     @assert has_assigned_ss(protein) "Protein must have assigned secondary structure."
-    colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
-    if eltype(C) <: Real
-        color_vectors = [colorscheme[color_vector] for color_vector in color_vectors]
-    end
     @assert length(protein) == length(color_vectors)
     @assert length.(protein) == length.(color_vectors)
     for (chain, colors) in zip(protein, color_vectors)

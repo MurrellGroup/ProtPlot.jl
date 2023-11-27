@@ -32,6 +32,10 @@ function arrow_surface(
     thickness = 0.3,
     spline_quality = 20,
 ) where T <: Real
+    if size(points1, 2) > 3 && size(points2, 2) > 3
+        points1 = points1[:, [1:end-2; end]]
+        points2 = points2[:, [1:end-2; end]]
+    end
     half_thickness = thickness / 2
     max_L = max(size(points1, 2), size(points2, 2))
     path1 = spline(points1, N=max_L*spline_quality, k=min(3, size(points1, 2)-1))
@@ -56,9 +60,13 @@ function arrow_surface(
 
     surface_vertices = zeros(T, 3, N, 5)
     for idx in 1:N
-        midpoint = midpath[:, idx]
-        normal = normals[:, idx]
-        binormal = binormals[:, idx]
+        t = (idx-1)/(N-1)
+        next_t = idx/(N-1)
+        should_move_point = t < l < next_t # hack to get the arrow head to have a 90 degree angle
+
+        midpoint = midpath[:, idx + should_move_point]
+        normal = normals[:, idx + should_move_point]
+        binormal = binormals[:, idx + should_move_point]
 
         half_normal = half_thickness .* normal
         arrow_vector = binormal * arrow((idx-1)/(N-1))
