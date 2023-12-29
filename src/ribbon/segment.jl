@@ -24,6 +24,7 @@ struct Segment{SS}
     end
 end
 
+@inline Base.:(==)(segment1::Segment, segment2::Segment) = segment1.chain == segment2.chain && segment1.range == segment2.range
 @inline Base.length(segment::Segment) = size(segment.backbone, 3)
 @inline Base.size(segment::Segment) = (length(segment),)
 
