@@ -6,19 +6,19 @@ export Segment, extend_segment, segments
 A segment of a chain with uniform secondary structure.
 """
 struct Segment{SS}
-    chain::Chain
+    chain::Protein.Chain
     range::UnitRange{Int}
-    backbone::Backbone{4}
+    backbone::Backbone
 
-    function Segment{SS}(chain::Chain, range::UnitRange{Int}) where SS
+    function Segment{SS}(chain::Protein.Chain, range::UnitRange{Int}) where SS
         ssvector = view(chain.ssvector, range)
         ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
         @assert SS == Unassigned || all(==(SS), ss_class_vector) "All residues in the '$SS' segment must have the '$SS' secondary structure"
-        backbone = chain.backbone[range]
+        backbone = chain.backbone[3*range.start-2:3*range.stop]
         return new{SS}(chain, range, backbone)
     end
 
-    function Segment(chain::Chain, range::UnitRange{Int})
+    function Segment(chain::Protein.Chain, range::UnitRange{Int})
         SS = SS_CLASS_DICT[chain.ssvector[range][1]]
         return Segment{SS}(chain, range)
     end
@@ -27,7 +27,7 @@ end
 @inline Base.length(segment::Segment) = size(segment.backbone, 3)
 @inline Base.size(segment::Segment) = (length(segment),)
 
-Base.summary(segment::Segment{SS}) where SS = "$SS Segment of Chain $(segment.chain.id) with $(length(segment)) residues"
+Base.summary(segment::Segment{SS}) where SS = "$SS Segment of Protein.Chain $(segment.chain.id) with $(length(segment)) residues"
 Base.show(io::IO, segment::Segment) = print(io, summary(segment))
 
 @inline Base.getindex(segment::Segment{SS}, r::UnitRange{Int}) where SS = Segment{SS}(segment.chain, segment.range[r])
@@ -57,8 +57,8 @@ Returns an array of segments of a chain.
 The segments are defined by the secondary structure of the residues.
 A chain with missing secondary structure information will throw an error.
 """
-function segments(chain::Chain)
-    !has_assigned_ss(chain) && @warn "Chain $(chain.id) has missing secondary structure information"
+function segments(chain::Protein.Chain)
+    !Protein.has_assigned_ss(chain) && @warn "Protein.Chain $(chain.id) has missing secondary structure information"
 
     ssvector = chain.ssvector
     ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
@@ -77,17 +77,14 @@ function segments(chain::Chain)
 end
 
 
-# utilities
-
-function segment_startpoint(segment::Segment, A=1) # nitrogen
-    return segment.backbone.coords[:,A,1] # first residue
+function segment_startpoint(segment::Segment)
+    return segment.backbone[1] # nitrogen of first residue
 end
 
-function segment_endpoint(segment::Segment, A=1) # nitrogen
-    segment_stop = segment.range.stop
-    if segment_stop == length(segment.chain)
-        return segment.chain.backbone[:,3,segment_stop] # carbon of last residue
+function segment_endpoint(segment::Segment)
+    if segment.range.stop == length(segment.chain)
+        return segment.backbone[end] # carbonyl of last residue
     else
-        return segment.chain.backbone[:,A,segment_stop+1] # next residue
+        return segment.chain.backbone[3*segment.range.stop+1] # next residue nitrogen
     end
 end

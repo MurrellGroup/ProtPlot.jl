@@ -3,7 +3,7 @@
     using .Ribbon
 
     @testset "Segment" begin
-        chain = Chain("A", Backbone(randn(3, 4, 5)))
+        chain = Protein.Chain("A", Backbone(randn(3, 4, 5)))
         chain.ssvector .= ['-', '-', '-', 'H', 'E']
         segment = Segment{Ribbon.Coil}(chain, 1:3)
         @test segment.chain == chain
@@ -11,7 +11,7 @@
     end
 
     @testset "extend_segment" begin
-        chain = Chain("A", Backbone(randn(3, 4, 5)))
+        chain = Protein.Chain("A", Backbone(randn(3, 4, 5)))
         chain.ssvector .= ['-', 'H', 'E', 'E', 'H']
         segment = Segment{Ribbon.Strand}(chain, 3:4)
         @test extend_segment(segment, 0:3) == Segment{Ribbon.Unassigned}(chain, 2:5)
@@ -19,7 +19,7 @@
 
     @testset "segments" begin
         coords = randn(3, 4, 3)
-        chain = Chain("B", Backbone(coords))
+        chain = Protein.Chain("B", Backbone(coords))
         chain.ssvector .= ['-', 'H', 'H']
         chain_segments = segments(chain)
         @test length(chain_segments) == 2

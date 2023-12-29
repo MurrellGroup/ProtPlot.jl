@@ -15,7 +15,7 @@ include("segment.jl")
 include("render.jl")
 
 """
-    ribbon!(container, protein::Protein; kwargs...)
+    ribbon!(container, protein::AbstractVector{Protein.Chain}; kwargs...)
 
 Renders a protein as a ribbon diagram onto a container.
 
@@ -27,18 +27,18 @@ Keyword arguments:
 """
 function ribbon!(
     container,
-    protein::Protein;
+    protein::AbstractVector{Protein.Chain};
     colorscheme::Union{ColorScheme, Symbol} = default_colorscheme,
     color_vectors::AbstractVector{<:AbstractVector{<:Union{Real, RGB}}} = [LinRange(0, 1, length(chain)) for chain in protein],
     kwargs...
 )
-    protein_assigned = if has_assigned_ss(protein) # the function should probably be called `fully_assigned_ss` or something -- "has" is ambiguous
+    protein_assigned = if Protein.has_assigned_ss(protein) # the function should probably be called `fully_assigned_ss` or something -- "has" is ambiguous
         protein
     else
-        @debug """The given protein has one or more residues with unassigned secondary structure.
+        @info """The given protein has one or more residues with unassigned secondary structure.
         Copying the protein and assigning secondary structure to the copy...
-        This can be avoided by calling `assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""
-        assign_secondary_structure(protein)
+        This can be avoided by calling `Protein.assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""
+        Protein.assign_secondary_structure(protein)
     end
 
     colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
@@ -52,12 +52,12 @@ function ribbon!(
 end
 
 """
-    ribbon(protein::Protein; kwargs...)
+    ribbon(protein::AbstractVector{Protein.Chain}; kwargs...)
 
 Renders a protein as a ribbon diagram.
 See `render!` for keyword arguments.
 """
-function ribbon(protein::Protein; backgroundcolor=:black, kwargs...)
+function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene)
     ribbon!(scene, protein; kwargs...)
