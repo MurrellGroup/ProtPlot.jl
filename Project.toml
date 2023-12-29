@@ -1,7 +1,7 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
 authors = ["Anton Oresten"]
-version = "0.3.0"
+version = "0.2.1"
 
 [deps]
 Backboner = "9ac9c2a2-1cfe-46d3-b3fd-6fa470ea56a7"
