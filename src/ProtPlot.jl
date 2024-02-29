@@ -1,7 +1,9 @@
 module ProtPlot
 
-import Backboner: Backboner, pdb_to_protein
-export Backboner, pdb_to_protein
+import Backboner
+import Backboner.Protein: readpdb
+
+export Backboner, readpdb
 
 include("ribbon/ribbon.jl")
 

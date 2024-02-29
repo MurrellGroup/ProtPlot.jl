@@ -19,7 +19,7 @@ ProtPlot offers two primary functions: `ribbon` and `ribbon!`:
 using ProtPlot
 
 # Load protein data from a PDB file
-protein = pdb_to_protein("test/data/1ZAK.pdb");
+protein = readpdb("test/data/1ZAK.pdb");
 
 # Create and display a ribbon plot in a new window
 ribbon(protein, backgroundcolor=:black, colorscheme=:jet)

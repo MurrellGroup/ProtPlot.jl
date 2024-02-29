@@ -35,10 +35,10 @@ function ribbon!(
     protein_assigned = if Protein.has_assigned_ss(protein) # the function should probably be called `fully_assigned_ss` or something -- "has" is ambiguous
         protein
     else
-        @info """The given protein has one or more residues with unassigned secondary structure.
+        #=@info """The given protein has one or more residues with unassigned secondary structure.
         Copying the protein and assigning secondary structure to the copy...
-        This can be avoided by calling `Protein.assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""
-        Protein.assign_secondary_structure(protein)
+        This can be avoided by calling `Protein.assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""=#
+        assign_secondary_structure(protein)
     end
 
     colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
@@ -65,5 +65,8 @@ function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, 
     display(scene)
     return scene
 end
+
+ribbon!(container, pdb_file::String; kwargs...) = ribbon!(container, Protein.readpdb(pdb_file); kwargs...)
+ribbon(pdb_file::String; kwargs...) = ribbon(Protein.readpdb(pdb_file); kwargs...)
 
 end
