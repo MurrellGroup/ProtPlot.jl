@@ -1,7 +1,7 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
 authors = ["Anton Oresten"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 AssigningSecondaryStructure = "8ed43e74-60fb-4e11-99b9-91deed37aef7"
@@ -14,7 +14,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [compat]
 AssigningSecondaryStructure = "0.3"
-Backboner = "0.8"
+Backboner = "0.9"
 ColorSchemes = "3"
 Colors = "0.12"
 Dierckx = "0.5"
