@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.9' # Use the specific version you need
+          - '1.10' # Use the specific version you need
         os:
           - ubuntu-latest
         arch:
