@@ -2,9 +2,10 @@ function render!(
     container,
     segment::Segment{Coil},
     colors::AbstractVector{<:RGB} = [colorant"red", colorant"yellow"];
-    radius = 0.25,
+    radius = 0.2,
     spline_quality = 20,
     slice_quality = 20,
+    plots = nothing,
     kwargs...
 )
     extended_segment = extend_segment(segment, 0:length(segment)+1)
@@ -19,7 +20,8 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
-    surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    !isnothing(plots) && push!(plots, p)
 
     return container
 end
@@ -33,6 +35,7 @@ function render!(
     helix_thickness = 0.25,
     spline_quality = 20,
     slice_quality = 20,
+    plots = nothing,
     kwargs...
 )
     startpoint = segment_startpoint(segment)
@@ -46,7 +49,8 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
-    surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    !isnothing(plots) && push!(plots, p)
 
     return container
 end
@@ -58,6 +62,7 @@ function render!(
     strand_width = 2.0,
     strand_thickness = 0.5,
     spline_quality = 20,
+    plots = nothing,
     kwargs...
 )
     startpoint = segment_startpoint(segment)
@@ -72,7 +77,8 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 
-    surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    !isnothing(plots) && push!(plots, p)
 
     return container
 end
@@ -95,7 +101,7 @@ end
 function render!(
     container,
     protein::AbstractVector{Protein.Chain};
-    colorscheme::ColorScheme = colorschemes[default_colorscheme],
+    colorscheme::ColorScheme = default_colorscheme,
     color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [colorscheme[LinRange(0, 1, length(chain))] for chain in protein],
     kwargs...
 )

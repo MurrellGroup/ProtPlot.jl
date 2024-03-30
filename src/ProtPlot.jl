@@ -7,7 +7,18 @@ export Backboner, readpdb
 
 include("ribbon/ribbon.jl")
 
-import .Ribbon: ribbon, ribbon!
+using .Ribbon
 export Ribbon, ribbon, ribbon!
 
+include("attention/attention.jl")
+
+using .Attention
+export Attention, PointAttention, AttentionPlotIterator
+
+include("animate.jl")
+
+using .Animate
+export Animate, animate_attention
+
 end
+ 

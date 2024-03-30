@@ -1,5 +1,7 @@
 module Ribbon
 
+export ribbon, ribbon!
+
 using Backboner
 using GLMakie
 using Colors

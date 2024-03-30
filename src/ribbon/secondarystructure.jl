@@ -51,7 +51,7 @@ const INT_TO_SS_CODE = ['-', 'H', 'E']
 Uses a simplified version of DSSP to fill the secondary structure vector of each chain with '-' (coil/loop), 'H' (helix), and 'E' (strand).
 """
 function AssigningSecondaryStructure.assign_secondary_structure!(protein::Vector{Protein.Chain})
-    ss_vectors = assign_secondary_structure(Protein.ncaco_coords.(protein))
+    ss_vectors = assign_secondary_structure([chain.backbone for chain in protein])
     for (chain, ssvector) in zip(protein, ss_vectors)
         @assert length(chain.ssvector) == length(ssvector)
         chain.ssvector .= get.(Ref(INT_TO_SS_CODE), ssvector, '-')
