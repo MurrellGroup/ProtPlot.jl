@@ -15,7 +15,7 @@ function animate_attention(
     azimuth_start = 1, azimuth_end = -6, output_file::String = "attention.mp4",
     ribbon_colorscheme = ColorSchemes.glasgow,
     attention_colorscheme = ColorSchemes.hsv,
-    end_padding = 3, grow_limits = false, from_centroid = true, frames_per_residue = 10::Int, framerate = 30::Int
+    end_padding = 3, grow_limits = false, from_centroid = true, frames_per_residue::Int = 10, framerate::Int = 30
 )
     
     if from_centroid
@@ -42,7 +42,7 @@ function animate_attention(
 
     # Aggregate all the plots from each frame, such that they can be deleted.
     # Ribbon plots are actually made up of multiple plots, so each subplot gets added to the list.
-    # A possible optimization is only deleting the last segment of the ribbon plot.
+    # A possible optimization is only deleting changed segments of the ribbon plot (e.g. last segment, and coils with emerging beta sheets)
     plots = Vector{AbstractPlot}()
 
     n = length(chain)

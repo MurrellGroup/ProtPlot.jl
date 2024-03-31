@@ -41,7 +41,7 @@ Take H points, and an LxH attention intensity matrix.
 For each column slice of the attention matrix, draw lines to the corresponding points with the intensities in the vector that exceed a certain threshold. 
 The thickness of the lines should be proportional to the value in the attention matrix.
 """
-function draw_attention_slice!(container,
+function draw_attention!(container,
     point::P, other_points::AbstractVector{P}, intensity_matrix::AbstractMatrix{<:Real};
     threshold::Real=1.0, colors=fill(RGB(1, 1, 1), size(intensity_matrix, 1)), kwargs...
 ) where P
@@ -57,7 +57,7 @@ function draw_attention_slice!(container,
 end
 
 function draw_attention_slice!(container, i::Int, attention::PointAttention; kwargs...)
-    draw_attention_slice!(container, eachcol(attention.points)[i], eachcol(attention.points)[1:i], @view(attention.intensities[:, i, 1:i]); kwargs...)
+    draw_attention!(container, eachcol(attention.points)[i], eachcol(attention.points)[1:i], @view(attention.intensities[:, i, 1:i]); kwargs...)
     return nothing
 end
 
