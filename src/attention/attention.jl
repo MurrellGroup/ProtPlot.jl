@@ -28,11 +28,11 @@ end
 
 function draw_lines_from_point!(container,
     point::P, other_points::AbstractVector{P}, linewidths::AbstractVector{<:Real};
-    color = RGB(1, 1, 1), linewidth_factor = 10.0, plots = nothing, kwargs...
+    color = RGB(1, 1, 1), linewidth_factor = 3.0, plots = nothing, kwargs...
 ) where P
     length(other_points) == length(linewidths) || throw(ArgumentError("The number of linewidths must match the number of other points.")) 
     xs, ys, zs = [reduce(vcat, ([point[i], other_point[i]] for other_point in other_points)) for i in 1:3]
-    p = linesegments!(container, xs, ys, zs; linewidth=linewidths .* linewidth_factor, color, transparency=true)
+    p = linesegments!(container, xs, ys, zs; linewidth=linewidths .* linewidth_factor, color, transparency=true, kwargs...)
     !isnothing(plots) && push!(plots, p)
 end
 
@@ -46,7 +46,7 @@ function draw_attention_slice!(container,
     threshold::Real=1.0, colors=fill(RGB(1, 1, 1), size(intensity_matrix, 1)), kwargs...
 ) where P
     h, l = size(intensity_matrix)
-    println(h, " ", l, " ", length(other_points))
+    #println(h, " ", l, " ", length(other_points))
     l == length(other_points) || throw(ArgumentError("The number of points must match the number of rows in the attention matrix."))
     for i in 1:h
         intensity_vector = @view intensity_matrix[i, :]
