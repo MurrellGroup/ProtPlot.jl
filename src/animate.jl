@@ -12,29 +12,42 @@ using ColorSchemes
 """
 function animate_attention(
     chain::Backboner.Protein.Chain, attention::AbstractArray{<:Real, 3};
-    azimuth_start = 1, azimuth_end = 0, output_file::String = "attention.mp4",
-    ribbon_colorscheme = ColorSchemes.jet,
-    attention_colorscheme = ColorSchemes.hawaii,
-    end_padding = 3,
+    azimuth_start = 1, azimuth_end = -6, output_file::String = "attention.mp4",
+    ribbon_colorscheme = ColorSchemes.glasgow,
+    attention_colorscheme = ColorSchemes.hsv,
+    end_padding = 3, grow_limits = false, from_centroid = true, frames_per_residue::Int = 10, framerate::Int = 30
 )
-    points = Backboner.Protein.alphacarbon_coords(chain)
+    
+    if from_centroid
+        points = Backboner.Frames(chain.backbone,Backboner.Protein.STANDARD_TRIANGLE_ANGSTROM).locations
+    else
+        points = Backboner.Protein.carbonyl_coords(chain)
+    end
+
     attention = PointAttention(points, attention)
 
     fig = Figure();
     ax = Axis3(fig[1, 1], protrusions=(20, 20, 10, 10), perspectiveness=0.2, aspect=:data);
     hidespines!(ax)
-    #hidedecorations!(ax)
+    hidedecorations!(ax)
+
+    if !grow_limits
+        plot_limits = extrema(points, dims=2)
+        xlims!(ax, plot_limits[1]) 
+        ylims!(ax, plot_limits[2]) 
+        zlims!(ax, plot_limits[3]) 
+    end
 
     ax.azimuth[] = azimuth_start
 
     # Aggregate all the plots from each frame, such that they can be deleted.
     # Ribbon plots are actually made up of multiple plots, so each subplot gets added to the list.
-    # A possible optimization is only deleting the last segment of the ribbon plot.
+    # A possible optimization is only deleting changed segments of the ribbon plot (e.g. last segment, and coils with emerging beta sheets)
     plots = Vector{AbstractPlot}()
 
     n = length(chain)
-    k = 5 # 5 frames per residue
-    framerate = 30
+    k = frames_per_residue # 5 frames per residue
+    
     frame_indices = 2:1/k:n+end_padding*framerate/k
     azimuth(t) = (t / (last(frame_indices) - first(frame_indices))) * (azimuth_end - azimuth_start) + azimuth_start
     record(fig, output_file, frame_indices, framerate=framerate) do i
