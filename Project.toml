@@ -1,7 +1,7 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
 authors = ["Anton Oresten <anton.oresten42@gmail.com>"]
-version = "0.3.3"
+version = "0.3.4"
 
 [deps]
 AssigningSecondaryStructure = "8ed43e74-60fb-4e11-99b9-91deed37aef7"
