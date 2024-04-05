@@ -25,12 +25,13 @@ function Base.getindex(chain::Protein.Chain, r::UnitRange{<:Integer})
 end
 
 # split a chain into subchains if there is a gap in the residue numbering
-function split_by_resnum(chain::Protein.Chain)
-    split_indices = findall(diff(chain.resnums) .!= 1)
+function split_by_resnum(chain::Protein.Chain, cn_distance_tolerance = 2)
+    resnum_splits = diff(chain.resnums) .!= 1
+    backbone_splits = Protein.carbonyl_nitrogen_distances(chain) .> cn_distance_tolerance
+    split_indices = findall(resnum_splits .| backbone_splits)
     if isempty(split_indices)
         return [chain]
     end
-
     ranges = UnitRange{Int}[]
     start_idx = 0
     for idx in split_indices

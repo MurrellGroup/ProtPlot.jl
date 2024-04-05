@@ -103,6 +103,7 @@ function render!(
     protein::AbstractVector{Protein.Chain};
     colorscheme::ColorScheme = default_colorscheme,
     color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [colorscheme[LinRange(0, 1, length(chain))] for chain in protein],
+    missing_residue_color = colorant"gray",
     plots = nothing,
     kwargs...
 )
@@ -121,8 +122,9 @@ function render!(
             # draw lines between start and ends of subchains
             for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
                 startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
-                xs, ys, zs = [LinRange(startpoint[i], endpoint[i], 16) for i in 1:3]
-                p = linesegments!(container, xs, ys, zs; linewidth=3, color=colorant"white", transparency=true)
+                n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
+                xs, ys, zs = [LinRange(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
+                p = linesegments!(container, xs, ys, zs; linewidth=2, color=missing_residue_color, transparency=true)
                 !isnothing(plots) && push!(plots, p)
             end
         end
