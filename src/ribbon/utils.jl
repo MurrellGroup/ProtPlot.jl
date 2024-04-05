@@ -19,3 +19,24 @@ function expand_colors(colors::Vector, N::Integer)
 
     return reshape(result[1:N], :, 1)
 end
+
+function Base.getindex(chain::Protein.Chain, r::UnitRange{<:Integer})
+    Protein.Chain(chain.id, chain.backbone[3*r.start-2:3r.stop], modelnum=chain.modelnum, resnums=chain.resnums[r], aavector=chain.aavector[r], ssvector=chain.ssvector[r])
+end
+
+# split a chain into subchains if there is a gap in the residue numbering
+function split_by_resnum(chain::Protein.Chain)
+    split_indices = findall(diff(chain.resnums) .!= 1)
+    if isempty(split_indices)
+        return [chain]
+    end
+
+    ranges = UnitRange{Int}[]
+    start_idx = 0
+    for idx in split_indices
+        push!(ranges, start_idx+1:idx)
+        start_idx = idx
+    end
+    push!(ranges, start_idx+1:length(chain))
+    return ranges
+end
