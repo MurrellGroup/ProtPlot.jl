@@ -31,7 +31,7 @@ function draw_lines_from_point!(container,
     color = RGB(1, 1, 1), linewidth_factor = 3.0, plots = nothing, kwargs...
 ) where P
     length(other_points) == length(linewidths) || throw(ArgumentError("The number of linewidths must match the number of other points.")) 
-    xs, ys, zs = [reduce(vcat, ([point[i], other_point[i]] for other_point in other_points)) for i in 1:3]
+    xs, ys, zs = [reduce(vcat, ([point[i], other_point[i]] for other_point in other_points); init=Vector{eltype(point)}()) for i in 1:3]
     p = linesegments!(container, xs, ys, zs; linewidth=linewidths .* linewidth_factor, color, transparency=true, kwargs...)
     !isnothing(plots) && push!(plots, p)
 end
