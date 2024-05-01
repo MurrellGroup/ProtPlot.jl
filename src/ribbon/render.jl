@@ -8,14 +8,12 @@ function render!(
     plots = nothing,
     kwargs...
 )
-    extended_segment = extend_segment(segment, 0:length(segment)+1)
-    startpoint = segment_startpoint(segment)
-    endpoint = segment_endpoint(segment)
-    controls = Protein.alphacarbon_coords(Protein.Chain(segment.backbone))[:, (isone(end) ? 1 : 2):end]
-    coords = [startpoint controls endpoint]
+    controls = Protein.alphacarbon_coords(Protein.Chain(segment.backbone))[:, (isone(end) ? 1 : 2):(end > 2 ? end-1 : end)]
+    coords = [segment_startpoint(segment) controls segment_endpoint(segment)]
     surface_vertices = coil_surface(coords;
         radius=radius, spline_quality=spline_quality, slice_quality=slice_quality,
-        ghost_control_start=segment_startpoint(extended_segment), ghost_control_end=segment_endpoint(extended_segment),
+        ghost_control_start = segment.range.start == 1 ? nothing : segment.chain.backbone[3*segment.range.start-2],
+        ghost_control_end = segment.range.stop == length(segment.chain) ? nothing : segment.chain.backbone[3*segment.range.stop+2],
         kwargs...
     )
     N = size(surface_vertices, 2)
@@ -98,13 +96,24 @@ function render!(
     return container
 end
 
+function draw_lines_between_subchains!(container, subchains::AbstractVector{Protein.Chain}, color::RGB; linewidth=2, plots=nothing, kwargs...)
+    for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
+        startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
+        n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
+        xs, ys, zs = [LinRange(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
+        p = linesegments!(container, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)
+        !isnothing(plots) && push!(plots, p)
+    end
+
+    return container
+end
+
 function render!(
     container,
     protein::AbstractVector{Protein.Chain};
     colorscheme::ColorScheme = default_colorscheme,
     color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [colorscheme[LinRange(0, 1, length(chain))] for chain in protein],
     missing_residue_color = colorant"gray",
-    plots = nothing,
     kwargs...
 )
     @assert Protein.has_assigned_ss(protein) "Protein must have assigned secondary structure."
@@ -119,14 +128,7 @@ function render!(
             for (subchain, r) in zip(subchains, subchain_ranges)
                 render!(container, subchain, colors[r]; kwargs...)
             end
-            # draw lines between start and ends of subchains
-            for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
-                startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
-                n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
-                xs, ys, zs = [LinRange(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
-                p = linesegments!(container, xs, ys, zs; linewidth=2, color=missing_residue_color, transparency=true)
-                !isnothing(plots) && push!(plots, p)
-            end
+            draw_lines_between_subchains!(container, subchains, missing_residue_color; kwargs...)
         end
     end
 

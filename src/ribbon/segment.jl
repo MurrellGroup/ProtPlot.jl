@@ -44,7 +44,7 @@ This function is useful if one wishes to access the coordinates of the atoms of 
 !!! note
     The new segment will have missing secondary structure, since segments are meant to describe uniform secondary structure of contiguous residues.
 """
-@inline function extend_segment(segment::Segment{SS}, range::UnitRange{Int}) where SS
+function extend_segment(segment::Segment{SS}, range::UnitRange{Int}) where SS
     offset = segment.range.start - 1
     parent_vec_range = range .+ offset
     adjusted_range = max(1, parent_vec_range.start):min(length(segment.chain), parent_vec_range.stop)
@@ -84,7 +84,7 @@ end
 
 function segment_endpoint(segment::Segment)
     if segment.range.stop == length(segment.chain)
-        return segment.backbone[end] # carbonyl of last residue
+        return segment.chain.backbone[end] # carbonyl of last residue
     else
         return segment.chain.backbone[3*segment.range.stop+1] # next residue nitrogen
     end

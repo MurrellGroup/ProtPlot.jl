@@ -7,13 +7,8 @@ function coil_surface(
     ghost_control_end = nothing,
     kwargs...
 ) where T <: Real
-
-    path = if !isnothing(ghost_control_start) && !isnothing(ghost_control_end)
-        spline(points, ghost_control_start, ghost_control_end, m=spline_quality, k=min(3, size(points, 2)-1))
-    else
-        spline_quality = size(points, 2) == 2 ? 2 : spline_quality
-        spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
-    end
+    spline_quality = size(points, 2) == 2 ? 2 : spline_quality
+    path = spline(points, ghost_control_start, ghost_control_end, m=spline_quality, k=min(3, size(points, 2)-1))
 
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)

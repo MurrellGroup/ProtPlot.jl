@@ -46,7 +46,7 @@ function animate_attention(
     plots = Vector{AbstractPlot}()
 
     n = length(chain)
-    k = frames_per_residue # 5 frames per residue
+    k = frames_per_residue
     
     frame_indices = 2:1/k:n+end_padding*framerate/k
     azimuth(t) = (t / (last(frame_indices) - first(frame_indices))) * (azimuth_end - azimuth_start) + azimuth_start
@@ -64,7 +64,8 @@ function animate_attention(
             ribbon!(ax, [subchain], colorscheme=ribbon_colorscheme, color_vectors=[range(0, i/length(chain), i)], plots=plots)
 
             try
-                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[range(0, 1, size(attention.intensities, 1))], plots=plots)
+                H = size(attention.intensities, 1)
+                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)], plots=plots)
             catch e
                 println("Got $e while attempting to render attention for residue $i.")
             end
