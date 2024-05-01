@@ -11,7 +11,7 @@ function render!(
     extended_segment = extend_segment(segment, 0:length(segment)+1)
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    controls = @view Protein.alphacarbon_coords(segment.backbone)[:, (isone(end) ? 1 : 2):end]
+    controls = Protein.alphacarbon_coords(Protein.Chain(segment.backbone))[:, (isone(end) ? 1 : 2):end]
     coords = [startpoint controls endpoint]
     surface_vertices = coil_surface(coords;
         radius=radius, spline_quality=spline_quality, slice_quality=slice_quality,
@@ -40,7 +40,7 @@ function render!(
 )
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    controls = @view Protein.alphacarbon_coords(segment.backbone)[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
+    controls = Protein.alphacarbon_coords(Protein.Chain(segment.backbone))[:, 2:end] # startpoint is first point instead. including first N *and* CA could mess with normals
     coords = hcat(startpoint, controls, endpoint)
     surface_vertices = helix_surface(coords;
         radius=helix_radius, width_factor=helix_width, thickness_factor=helix_thickness,
@@ -67,8 +67,8 @@ function render!(
 )
     startpoint = segment_startpoint(segment)
     endpoint = segment_endpoint(segment)
-    oxygen_coords_side1 = @view Protein.oxygen_coords(segment.backbone)[:, 1:2:end-1]
-    oxygen_coords_side2 = @view Protein.oxygen_coords(segment.backbone)[:, 2:2:end]
+    oxygen_coords_side1 = @view Protein.oxygen_coords(Protein.Chain(segment.backbone))[:, 1:2:end-1]
+    oxygen_coords_side2 = @view Protein.oxygen_coords(Protein.Chain(segment.backbone))[:, 2:2:end]
     coords1 = hcat(startpoint, oxygen_coords_side1, endpoint)
     coords2 = hcat(startpoint, oxygen_coords_side2, endpoint)
     surface_vertices = arrow_surface(coords1, coords2;
