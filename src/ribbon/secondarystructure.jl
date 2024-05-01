@@ -1,4 +1,4 @@
-using AssigningSecondaryStructure
+import AssigningSecondaryStructure as ASS
 
 @enum SSClass Unassigned Coil Helix Strand
 
@@ -45,28 +45,11 @@ end
 
 const INT_TO_SS_CODE = ['-', 'H', 'E']
 
-"""
-    assign_secondary_structure!(protein)
-
-Uses a simplified version of DSSP to fill the secondary structure vector of each chain with '-' (coil/loop), 'H' (helix), and 'E' (strand).
-"""
-function AssigningSecondaryStructure.assign_secondary_structure!(protein::Vector{Protein.Chain})
-    ss_vectors = assign_secondary_structure([chain.backbone for chain in protein])
+function ASS.assign_secondary_structure!(protein::Vector{Protein.Chain})
+    ss_vectors = ASS.assign_secondary_structure(protein)
     for (chain, ssvector) in zip(protein, ss_vectors)
-        @assert length(chain.ssvector) == length(ssvector)
         chain.ssvector .= get.(Ref(INT_TO_SS_CODE), ssvector, '-')
         clean_secondary_structure!(chain.ssvector)
     end
     return protein
-end
-
-"""
-    assign_secondary_structure(protein)
-
-Returns a new protein with secondary structure assigned.
-"""
-function AssigningSecondaryStructure.assign_secondary_structure(protein::Vector{Protein.Chain})
-    new_protein = deepcopy(protein)
-    assign_secondary_structure!(new_protein)
-    return new_protein
 end

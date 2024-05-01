@@ -34,14 +34,7 @@ function ribbon!(
     color_vectors::AbstractVector{<:AbstractVector{<:Union{Real, RGB}}} = [LinRange(0, 1, length(chain)) for chain in protein],
     kwargs...
 )
-    protein_assigned = if Protein.has_assigned_ss(protein) # the function should probably be called `fully_assigned_ss` or something -- "has" is ambiguous
-        protein
-    else
-        #=@info """The given protein has one or more residues with unassigned secondary structure.
-        Copying the protein and assigning secondary structure to the copy...
-        This can be avoided by calling `Protein.assign_secondary_structure!` on the protein or by modifying the ssvector field of the protein chains manually."""=#
-        assign_secondary_structure(protein)
-    end
+    protein_assigned = ASS.assign_secondary_structure!(deepcopy(protein))
 
     colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
     if eltype(eltype(color_vectors)) <: Real
