@@ -1,5 +1,8 @@
 module ProtPlot
 
+using GLMakie
+using ColorSchemes
+
 import Backboner
 import Backboner.Protein: readpdb
 
@@ -19,6 +22,8 @@ include("animate.jl")
 
 using .Animate
 export Animate, animate_attention
+
+include("ramachandran.jl")
 
 end
  

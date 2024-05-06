@@ -7,6 +7,23 @@ using ..ProtPlot
 using GLMakie
 using ColorSchemes
 
+function render_rotation_frame!(container,
+    chain::Backboner.Protein.Chain, frames::Backboner.Frames, i::Int,
+    rotation_frame_lightness::Float64; plots=nothing,
+)
+    frame = frames[i]
+    m = collect(frame.rotation)
+    len = 2.0
+    p = arrows!(container,
+        fill(Point3f(chain.backbone[:, 3i]...), 3),
+        [len * Vec3f(col...) for col in eachcol(m)],
+        color=[colorant"red", colorant"lime", colorant"blue"] .* rotation_frame_lightness,
+        arrowsize = Vec3f(0.6, 0.6, 1.0),
+        linewidth=0.4,
+        fxaa=true)
+    !isnothing(plots) && push!(plots, p)
+end
+
 """
     animate_attention(chain::Backboner.Protein.Chain, attention::AbstractArray{<:Real, 3}; kwargs...)
 """
@@ -15,11 +32,13 @@ function animate_attention(
     azimuth_start = 1, azimuth_end = -6, output_file::String = "attention.mp4",
     ribbon_colorscheme = ColorSchemes.glasgow,
     attention_colorscheme = ColorSchemes.hsv,
-    end_padding = 3, grow_limits = false, from_centroid = true, frames_per_residue::Int = 10, framerate::Int = 30
+    end_padding = 3, grow_limits = false, from_centroid = false,
+    frames_per_residue::Int = 10, framerate::Int = 30, show_rotation_frame = false,
+    rotation_frame_lightness = 0.5,
 )
-    
+    frames = Backboner.Frames(chain.backbone, Backboner.Protein.STANDARD_TRIANGLE_ANGSTROM)
     if from_centroid
-        points = Backboner.Frames(chain.backbone,Backboner.Protein.STANDARD_TRIANGLE_ANGSTROM).locations
+        points = frames.locations
     else
         points = Backboner.Protein.carbonyl_coords(chain)
     end
@@ -50,15 +69,17 @@ function animate_attention(
     
     frame_indices = 2:1/k:n+end_padding*framerate/k
     azimuth(t) = (t / (last(frame_indices) - first(frame_indices))) * (azimuth_end - azimuth_start) + azimuth_start
-    record(fig, output_file, frame_indices, framerate=framerate) do i
-        ax.azimuth[] = azimuth(i)
-        if i % 1 == 0 && i <= n
-            i = round(Int, i)
+    record(fig, output_file, frame_indices, framerate=framerate) do x
+        ax.azimuth[] = azimuth(x)
+        if x % 1 == 0 && x <= n
+            i = round(Int, x)
 
             for plot in plots
                 delete!(ax.scene, plot)
             end
             empty!(plots)
+
+            show_rotation_frame && render_rotation_frame!(ax, chain, frames, i, rotation_frame_lightness, plots=plots)
 
             subchain = Backboner.Protein.Chain(@view(chain.backbone[1:3i]), ssvector=chain.ssvector[1:i])
             ribbon!(ax, [subchain], colorscheme=ribbon_colorscheme, color_vectors=[range(0, i/length(chain), i)], plots=plots)
