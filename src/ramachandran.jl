@@ -1,11 +1,5 @@
 export ramachandran
 
-function middle_residues(resnums::AbstractVector{<:Integer})
-    contiguous = 
-    return contiguous
-end
-
-
 function ramachandran!(ax, phi_angles, psi_angles; color=:black, kwargs...)
     scatter!(ax, rad2deg.(phi_angles), rad2deg.(psi_angles), color=color)
     return nothing
@@ -28,7 +22,7 @@ function ramachandran!(ax, chains::AbstractVector{Backboner.Protein.Chain}; kwar
     return nothing
 end
 
-function ramachandran(x;
+function ramachandran(x...;
     size=(600, 600), title="Ramachandran Plot", xlabel="Phi", ylabel="Psi", kwargs...
 )
     fig = Figure(size=size)
@@ -37,6 +31,6 @@ function ramachandran(x;
         xticks=[-180, -90, 0, 90, 180],
         yticks=[-180, -90, 0, 90, 180],
         limits=(-180, 180, -180, 180))
-    ramachandran!(ax, x; kwargs...)
+    ramachandran!(ax, x...; kwargs...)
     return fig
 end
