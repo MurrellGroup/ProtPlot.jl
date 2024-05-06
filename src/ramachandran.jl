@@ -5,11 +5,19 @@ function ramachandran!(ax, phi_angles, psi_angles; color=:black, kwargs...)
     return nothing
 end
 
-function ramachandran!(ax, chain::Backboner.Protein.Chain; color=:black, kwargs...)
+function ramachandran!(ax, chain::Backboner.Protein.Chain; mask_missing=true, verbose=true, kwargs...)
     bonds = Backboner.ChainedBonds(chain.backbone)
     phi_angles = Backboner.Protein.phi_angles(bonds)
     psi_angles = Backboner.Protein.psi_angles(bonds)
-    ramachandran!(ax, phi_angles, psi_angles; color=color, kwargs...)
+    if mask_missing
+        contiguity_mask = chain.resnums[2:end] .== chain.resnums[1:end-1] .+ 1
+        if !all(contiguity_mask)
+            phi_angles = phi_angles[contiguity_mask]
+            psi_angles = psi_angles[contiguity_mask]
+            verbose && @warn "Discarding $(count(!, contiguity_mask)) out of $(length(contiguity_mask)) points in Ramachandran plot due to missing residues."
+        end
+    end
+    ramachandran!(ax, phi_angles, psi_angles; verbose, kwargs...)
     return nothing
 end
 
@@ -21,7 +29,8 @@ function ramachandran!(ax, chains::AbstractVector{Backboner.Protein.Chain}; kwar
 end
 
 function ramachandran(x;
-    title="Ramachandran Plot", xlabel="Phi", ylabel="Psi", kwargs...
+    title="Ramachandran Plot", xlabel="Phi", ylabel="Psi",
+kwargs...
 )
     fig = Figure()
     ax = Axis(fig[1, 1],
