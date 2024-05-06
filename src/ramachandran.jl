@@ -29,8 +29,7 @@ function ramachandran!(ax, chains::AbstractVector{Backboner.Protein.Chain}; kwar
 end
 
 function ramachandran(x;
-    title="Ramachandran Plot", xlabel="Phi", ylabel="Psi",
-kwargs...
+    title="Ramachandran Plot", xlabel="Phi", ylabel="Psi", kwargs...
 )
     fig = Figure()
     ax = Axis(fig[1, 1],
