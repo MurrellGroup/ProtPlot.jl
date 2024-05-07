@@ -10,7 +10,7 @@ function ramachandran!(ax, chain::Backboner.Protein.Chain; verbose=false, kwargs
     valid_residues = [false; chain.resnums[1:end-2] .+ 1 .== chain.resnums[2:end-1] .&& chain.resnums[2:end-1] .+ 1 .== chain.resnums[3:end]; false]
     phi_angles = Backboner.Protein.phi_angles(bonds)[valid_residues[1:end-1]]
     psi_angles = Backboner.Protein.psi_angles(bonds)[valid_residues[2:end]]
-    verbose && count(!, valid_residues) > 2 && @warn "Discarding $(count(!, valid_residues)) out of $(length(valid_residues)) residues in Ramachandran plot due to missing residues/angles."
+    verbose && count(!, valid_residues) > 2 && @warn "Discarding $(count(!, valid_residues) - 2) out of $(length(valid_residues)) residues in Ramachandran plot due to missing residues."
     ramachandran!(ax, phi_angles, psi_angles; verbose, kwargs...)
     return nothing
 end
