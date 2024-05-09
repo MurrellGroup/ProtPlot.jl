@@ -34,3 +34,5 @@ function ramachandran(x...;
     ramachandran!(ax, x...; kwargs...)
     return fig
 end
+
+ramachandran(pdbfile::AbstractString; title=basename(pdbfile), kwargs...) = ramachandran(readpdb(pdbfile); title, kwargs...)
