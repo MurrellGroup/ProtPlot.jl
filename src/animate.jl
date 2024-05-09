@@ -34,7 +34,7 @@ function animate_attention(
     attention_colorscheme = ColorSchemes.hsv,
     end_padding = 3, grow_limits = false, from_centroid = false,
     frames_per_residue::Int = 10, framerate::Int = 30, show_rotation_frame = false,
-    rotation_frame_lightness = 0.5,
+    rotation_frame_lightness = 0.5, kwargs...
 )
     frames = Backboner.Frames(chain.backbone, Backboner.Protein.STANDARD_TRIANGLE_ANGSTROM)
     if from_centroid
@@ -86,7 +86,7 @@ function animate_attention(
 
             try
                 H = size(attention.intensities, 1)
-                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)], plots=plots)
+                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)]; plots, kwargs)
             catch e
                 println("Got $e while attempting to render attention for residue $i.")
             end
