@@ -86,7 +86,7 @@ function animate_attention(
 
             try
                 H = size(attention.intensities, 1)
-                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)]; plots, kwargs)
+                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)]; plots, kwargs...)
             catch e
                 println("Got $e while attempting to render attention for residue $i.")
             end
