@@ -1,4 +1,5 @@
 using ProtPlot
+using GLMakie
 using Test
 
 using Backboner

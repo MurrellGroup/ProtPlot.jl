@@ -47,16 +47,20 @@ function ribbon!(
 end
 
 """
-    ribbon(protein::AbstractVector{Protein.Chain}; kwargs...)
+    ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
-Renders a protein as a ribbon diagram.
-See `render!` for keyword arguments.
+Render a protein as a ribbon diagram. The display will be automatically centered on `protein`,
+unless the user supplies `camcontrols` (see Makie's camera documentation for details).
+
+See `render!` for additional keyword arguments.
 """
-function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, kwargs...)
+function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
-    cam3d!(scene)
+    cam3d!(scene; camcontrols...)
     ribbon!(scene, protein; kwargs...)
-    center!(scene)
+    if isempty(camcontrols)
+        center!(scene)
+    end
     display(scene)
     return scene
 end
