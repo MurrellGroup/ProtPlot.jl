@@ -11,7 +11,7 @@ ProtPlot is a Julia package for rendering 3D protein ribbon plots using [GLMakie
 
 ProtPlot offers two primary functions: `ribbon` and `ribbon!`:
 - `ribbon`: Creates a new interactive window to render the ribbon plot.
-- `ribbon!`: Renders the ribbon plot within an existing container (e.g., `Scene` or `Axis3`). 
+- `ribbon!`: Renders the ribbon plot within an existing container (e.g., `Scene` or `Axis3`).
 
 ### Example usage
 
@@ -28,4 +28,15 @@ This example will open an interactive window featuring a ribbon plot of the prot
 
 ### Customizing colors
 
-To customize colors at the residue level, use the color_vectors keyword argument. This argument accepts a vector of vectors, where each inner vector contains colors or numeric values between 0 and 1, representing the colors of each residue in a chain. If numbers are passed instead of colors, they will be converted according to the colorscheme. 
+To customize colors at the residue level, use the color_vectors keyword argument. This argument accepts a vector of vectors, where each inner vector contains colors or numeric values between 0 and 1, representing the colors of each residue in a chain. If numbers are passed instead of colors, they will be converted according to the colorscheme.
+
+### Camera controls
+
+Makie allows programmatic control over the [camera](https://docs.makie.org/stable/explanations/cameras/index.html).
+Use the `camcontrols` keyword to control the initial view:
+
+```julia
+using GLMakie    # to make `Vec3f` available
+
+ribbon(protein, camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
+```
