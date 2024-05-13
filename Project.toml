@@ -18,7 +18,7 @@ Backboner = "0.9"
 ColorSchemes = "3"
 Colors = "0.12"
 Dierckx = "0.5"
-GLMakie = "0.9, 0.10"
+GLMakie = "0.9"
 LinearAlgebra = "1"
 julia = "1"
 
