@@ -1,11 +1,4 @@
-module Animate
-
 export animate_attention
-
-using ..ProtPlot
-
-using GLMakie
-using ColorSchemes
 
 function render_rotation_frame!(container,
     chain::Backboner.Protein.Chain, frames::Backboner.Frames, i::Int,
@@ -92,6 +85,4 @@ function animate_attention(
             end
         end
     end
-end
-
 end

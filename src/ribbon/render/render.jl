@@ -1,11 +1,14 @@
+include("shapes/shapes.jl")
+
 function render!(
-    container,
-    segment::Segment{Coil},
-    colors::AbstractVector{<:RGB} = [colorant"red", colorant"yellow"];
+    ribbon::Ribbon,
+    ::Val{:coil},
+    segment_range::UnitRange{Int},
+    chain::Protein.Chain,
+    colors;
     radius = 0.2,
     spline_quality = 20,
     slice_quality = 20,
-    plots = nothing,
     kwargs...
 )
     controls = Protein.alphacarbon_coords(Protein.Chain(segment.backbone))[:, (isone(end) ? 1 : 2):(end > 2 ? end-1 : end)]
@@ -18,22 +21,21 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
-    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
-    !isnothing(plots) && push!(plots, p)
-
-    return container
+    surface!(ribbon, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    nothing
 end
 
 function render!(
-    container,
-    segment::Segment{Helix},
-    colors::AbstractVector{<:RGB} = [colorant"lime", colorant"cyan"];
+    ribbon::Ribbon,
+    ::Val{:helix},
+    segment_range::UnitRange{Int},
+    chain::Protein.Chain,
+    colors;
     helix_radius = 1.0,
     helix_width = 1.0,
     helix_thickness = 0.25,
     spline_quality = 20,
     slice_quality = 20,
-    plots = nothing,
     kwargs...
 )
     startpoint = segment_startpoint(segment)
@@ -47,20 +49,19 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N)
-    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
-    !isnothing(plots) && push!(plots, p)
-
-    return container
+    surface!(ribbon, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    nothing
 end
 
 function render!(
-    container,
-    segment::Segment{Strand},
-    colors::AbstractVector{<:RGB} = [colorant"blue", colorant"magenta"];
+    ribbon::Ribbon,
+    ::Val{:strand},
+    segment_range::UnitRange{Int},
+    chain::Protein.Chain,
+    colors;
     strand_width = 2.0,
     strand_thickness = 0.5,
     spline_quality = 20,
-    plots = nothing,
     kwargs...
 )
     startpoint = segment_startpoint(segment)
@@ -75,62 +76,45 @@ function render!(
     )
     N = size(surface_vertices, 2)
     color_matrix = expand_colors(colors, N) 
-    p = surface!(container, eachslice(surface_vertices, dims=1)..., color=color_matrix)
-    !isnothing(plots) && push!(plots, p)
-
-    return container
+    surface!(ribbon, eachslice(surface_vertices, dims=1)..., color=color_matrix)
+    nothing
 end
 
 function render!(
-    container,
+    ribbon::Ribbon,
     chain::Protein.Chain,
     colors::AbstractVector{<:RGB};
     kwargs...
 )
-    @assert length(chain) == length(colors)
-    @assert Protein.has_assigned_ss(chain)
-    for segment in segments(chain)
-        render!(container, segment, colors[segment.range]; kwargs...)
+    for (ss_name, segment_range) in segments(chain)
+        render!(ribbon, Val(ss_name), segment_range, chain, colors; kwargs...)
     end
-
-    return container
+    nothing
 end
 
-function draw_lines_between_subchains!(container, subchains::AbstractVector{Protein.Chain}, color::RGB; linewidth=2, plots=nothing, kwargs...)
+function draw_lines_between_subchains!(ribbon::Ribbon, subchains::AbstractVector{Protein.Chain}, color::RGB; linewidth=2, kwargs...)
     for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
         startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
         n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
         xs, ys, zs = [LinRange(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
-        p = linesegments!(container, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)
-        !isnothing(plots) && push!(plots, p)
+        linesegments!(ribbon, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)
     end
-
-    return container
+    nothing
 end
 
-function render!(
-    container,
-    protein::AbstractVector{Protein.Chain};
-    colorscheme::ColorScheme = default_colorscheme,
-    color_vectors::AbstractVector{<:AbstractVector{<:RGB}} = [colorscheme[LinRange(0, 1, length(chain))] for chain in protein],
-    missing_residue_color = colorant"gray",
-    kwargs...
-)
-    @assert Protein.has_assigned_ss(protein) "Protein must have assigned secondary structure."
-    @assert length(protein) == length(color_vectors)
-    @assert length.(protein) == length.(color_vectors)
-    for (chain, colors) in zip(protein, color_vectors)
+function render!(ribbon::Ribbon, chains::Vector{Protein.Chain})
+    for (chain, colors) in zip(chains, ribbon.attributes.color_vectors)
         subchain_ranges = split_by_resnum(chain)
         if length(subchain_ranges) == 1
-            render!(container, chain, colors; kwargs...)
+            render!(ribbon, chain, colors; kwargs...)
         else
             subchains = [chain[r] for r in subchain_ranges]
             for (subchain, r) in zip(subchains, subchain_ranges)
-                render!(container, subchain, colors[r]; kwargs...)
+                render!(ribbon, subchain, colors[r]; kwargs...)
             end
-            draw_lines_between_subchains!(container, subchains, missing_residue_color; kwargs...)
+            draw_lines_between_subchains!(ribbon, subchains, missing_residue_color; kwargs...)
         end
     end
 
-    return container
+    return nothing
 end

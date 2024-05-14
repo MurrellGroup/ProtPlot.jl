@@ -41,3 +41,21 @@ function split_by_resnum(chain::Protein.Chain, cn_distance_tolerance = 2)
     push!(ranges, start_idx+1:length(chain))
     return ranges
 end
+
+function segments(chain::Protein.Chain)
+    ssvector = chain.ssvector
+    ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
+    start_idx = 1
+    end_idx = 1
+    segment_ranges = Tuple{Symbol, UnitRange{Int}}[]
+    for (i, ss) in enumerate(ss_class_vector)
+        if ss != ss_class_vector[start_idx]
+            ss_name = SS_NAME_DICT[ss]
+            push!(segment_ranges, (ss_name, start_idx:end_idx))
+            start_idx = i
+        end
+        end_idx = i
+    end
+    push!(segment_ranges, start_idx:end_idx)
+    return segment_ranges
+end

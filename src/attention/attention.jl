@@ -2,12 +2,6 @@ module Attention
 
 export PointAttention
 
-using Backboner
-using GLMakie
-using Colors
-using ColorSchemes
-using LinearAlgebra
-
 """
 Holds L 3D points and an HxLxL attention intensity tensor.
 The attention to the first i residues at time i is intensities[:, i, 1:i].
@@ -60,5 +54,7 @@ function draw_attention_slice!(container, i::Int, attention::PointAttention; kwa
     draw_attention!(container, eachcol(attention.points)[i], eachcol(attention.points)[1:i], @view(attention.intensities[:, i, 1:i]); kwargs...)
     return nothing
 end
+
+include("animate.jl")
 
 end

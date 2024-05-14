@@ -1,14 +1,12 @@
 import AssigningSecondaryStructure as ASS
 
-@enum SSClass Unassigned Coil Helix Strand
-
 const COIL_CODES = Set(['C', 'T', 'S', '-', ' '])
 const HELIX_CODES = Set(['G', 'H', 'I'])
 const STRAND_CODES = Set(['E', 'B'])
 
-const SS_CLASS_DICT = Dict{Char, SSClass}()
+const SS_NAME_DICT = Dict{Char, Symbol}()
 
-for (codes, structure) in zip([COIL_CODES, HELIX_CODES, STRAND_CODES], [Coil, Helix, Strand])
+for (codes, structure) in zip([COIL_CODES, HELIX_CODES, STRAND_CODES], [:coil, :helix, :strand])
     for code in codes
         SS_CLASS_DICT[code] = structure
     end
@@ -45,11 +43,19 @@ end
 
 const INT_TO_SS_CODE = ['-', 'H', 'E']
 
-function ASS.assign_secondary_structure!(protein::Vector{Protein.Chain})
-    ss_vectors = ASS.assign_secondary_structure(protein)
-    for (chain, ssvector) in zip(protein, ss_vectors)
-        chain.ssvector .= get.(Ref(INT_TO_SS_CODE), ssvector, '-')
-        clean_secondary_structure!(chain.ssvector)
+function _assign_secondary_structure(chains::Vector{Protein.Chain})
+    ssvectors = ASS.assign_secondary_structure(chains)
+    for ssvector in ssvectors
+        ssvector .= get.(Ref(INT_TO_SS_CODE), ssvector, '-')
+        clean_secondary_structure!(ssvector)
     end
-    return protein
+    return ssvectors
+end
+
+function _assign_secondary_structure!(chains::Vector{Protein.Chain})
+    ssvectors = _assign_secondary_structure(chains)
+    for (chain, ssvector) in zip(chains, ssvectors)
+        chain.ssvector .= ssvector
+    end
+    return chains
 end

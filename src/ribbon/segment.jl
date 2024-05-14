@@ -58,24 +58,6 @@ Returns an array of segments of a chain.
 The segments are defined by the secondary structure of the residues.
 A chain with missing secondary structure information will throw an error.
 """
-function segments(chain::Protein.Chain)
-    !Protein.has_assigned_ss(chain) && @warn "Protein.Chain $(chain.id) has missing secondary structure information"
-
-    ssvector = chain.ssvector
-    ss_class_vector = [SS_CLASS_DICT[ss] for ss in ssvector]
-    start_idx = 1
-    end_idx = 1
-    segments = Segment[]
-    for (i, ss) in enumerate(ss_class_vector)
-        if ss != ss_class_vector[start_idx]
-            push!(segments, Segment{ss_class_vector[start_idx]}(chain, start_idx:end_idx))
-            start_idx = i
-        end
-        end_idx = i
-    end
-    push!(segments, Segment{ss_class_vector[start_idx]}(chain, start_idx:end_idx))
-    return segments
-end
 
 
 function segment_startpoint(segment::Segment)
