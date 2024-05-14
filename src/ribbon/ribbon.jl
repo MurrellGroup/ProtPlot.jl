@@ -8,7 +8,20 @@ using Makie
         backgroundcolor = :black,
         colormap = :jet,
         colors = nothing,
-        camcontrols = (;),
+        
+        coil_radius = 0.2,
+        coil_spline_quality = 20,
+        coil_slice_quality = 20,
+
+        helix_radius = 1.0,
+        helix_width = 1.0,
+        helix_thickness = 0.25,
+        helix_spline_quality = 20,
+        helix_slice_quality = 20,
+
+        strand_width = 2.0,
+        strand_thickness = 0.5,
+        strand_spline_quality = 20,
     )
 end
 
@@ -27,8 +40,6 @@ function Makie.plot!(ribbon::Ribbon{Vector{Protein.Chain}})
     return ribbon
 end
 
-
-
 #="""
     ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
@@ -44,7 +55,6 @@ function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, 
     if isempty(camcontrols)
         center!(scene)
     end
-    display(scene)
     return scene
 end=#
 

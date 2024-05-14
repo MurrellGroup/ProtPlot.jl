@@ -1,8 +1,8 @@
 # uses surrounding points to move the ends of the paths slightly away from each other, if they are equal
 # such that the normals can be calculated correctly
 function deintersect_ends!(path1::AbstractMatrix{T}, path2::AbstractMatrix{T}) where T <: Real
-    @assert size(path1, 2) == size(path2, 2)
-    @assert size(path1, 1) >= 3
+    size(path1, 2) == size(path2, 2) || throw(ArgumentError("The paths must have the same number of points."))
+    size(path1, 1) >= 3 || throw(ArgumentError("The paths must have at least 3 dimensions."))
     if path1[:,1] == path2[:,1]
         next_binormal = path1[:,2] - path2[:,2]
         path1[:,1] += next_binormal .* 0.1
@@ -25,16 +25,13 @@ arrow_function(l=0.5, w=0.5, W=1.0) = let hw = w/2, hW = W/2
     t -> t > l ? hW*(t-1)/(l-1) : hw
 end
 
-function arrow_surface(
-    points1::AbstractMatrix{T},
-    points2::AbstractMatrix{T};
-    width = 1.0,
-    thickness = 0.3,
-    arrow_head_length = 3.5,
-    arrow_head_width = 2*width,
-    spline_quality = 20,
-    kwargs...
-) where T <: Real
+function arrow_surface(points1::AbstractMatrix{T}, points2::AbstractMatrix{T}, attributes) where T <: Real
+    width = attributes.strand_width
+    thickness = attributes.strand_thickness
+    arrow_head_length = attributes.strand_arrow_head_length
+    arrow_head_width = attributes.strand_arrow_head_width
+    spline_quality = attributes.strand_spline_quality
+
     if size(points1, 2) > 3 && size(points2, 2) > 3
         points1 = points1[:, [1:end-2; end]]
         points2 = points2[:, [1:end-2; end]]
@@ -44,7 +41,7 @@ function arrow_surface(
     path1 = spline(points1, N=max_L*spline_quality, k=min(3, size(points1, 2)-1))
     path2 = spline(points2, N=max_L*spline_quality, k=min(3, size(points2, 2)-1))
     deintersect_ends!(path1, path2) # this is a hack to make the normals work
-    @assert size(path1, 2) == size(path2, 2)
+
     N = size(path1, 2)
 
     midpath = (path1 + path2) / 2

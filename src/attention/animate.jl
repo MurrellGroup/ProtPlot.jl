@@ -23,8 +23,8 @@ end
 function animate_attention(
     chain::Backboner.Protein.Chain, attention::AbstractArray{<:Real, 3};
     azimuth_start = 1, azimuth_end = -6, output_file::String = "attention.mp4",
-    ribbon_colorscheme = ColorSchemes.glasgow,
-    attention_colorscheme = ColorSchemes.hsv,
+    ribbon_colorscheme = :glasgow,
+    attention_colorscheme = :hsv,
     end_padding = 3, grow_limits = false, from_centroid = false,
     frames_per_residue::Int = 10, framerate::Int = 30, show_rotation_frame = false,
     rotation_frame_lightness = 0.5, kwargs...

@@ -1,14 +1,12 @@
 # normal depends on second derivative of the path
 # does weird twist when second derivative changes too quickly
-function helix_surface(
-    points::AbstractMatrix{T};
-    radius = 1.0,
-    width_factor = 1.0,
-    thickness_factor = 1.0,
-    spline_quality = 20,
-    slice_quality = 20,
-    kwargs...
-) where T <: Real
+function helix_surface(points::AbstractMatrix{T}, attributes) where T <: Real
+    radius = attributes.helix_radius
+    width_factor = attributes.helix_width
+    thickness_factor = attributes.helix_thickness
+    spline_quality = attributes.helix_spline_quality
+    slice_quality = attributes.helix_slice_quality
+
     path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)

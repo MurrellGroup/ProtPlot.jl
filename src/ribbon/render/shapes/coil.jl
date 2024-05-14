@@ -1,14 +1,10 @@
-function coil_surface(
-    points::AbstractMatrix{T};
-    radius = 1.0,
-    spline_quality = 20,
-    slice_quality = 20,
-    ghost_control_start = nothing,
-    ghost_control_end = nothing,
-    kwargs...
-) where T <: Real
+function coil_surface(points::AbstractMatrix{T}, attributes) where T <: Real
+    radius = attributes.coil_radius
+    spline_quality = attributes.coil_spline_quality
+    slice_quality = attributes.coil_slice_quality
+
     spline_quality = size(points, 2) == 2 ? 2 : spline_quality
-    path = spline(points, ghost_control_start, ghost_control_end, m=spline_quality, k=min(3, size(points, 2)-1))
+    path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
 
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)
