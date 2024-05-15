@@ -1,45 +1,46 @@
 export animate_attention
 
 function render_rotation_frame!(container,
-    chain::Backboner.Protein.Chain, frames::Backboner.Frames, i::Int,
-    rotation_frame_lightness::Float64; plots=nothing,
+    chain::Protein.Chain, frames::Frames, i::Int;
+    plot_list=nothing,
 )
     frame = frames[i]
     m = collect(frame.rotation)
     len = 2.0
     p = arrows!(container,
-        fill(Point3f(chain.backbone[:, 3i]...), 3),
+        fill(Point3f(chain.backbone[:, 3i-1]...), 3),
         [len * Vec3f(col...) for col in eachcol(m)],
-        color=[colorant"red", colorant"lime", colorant"blue"] .* rotation_frame_lightness,
+        colormap=:seaborn_dark6,
+        color=[5/12, 3/12, 1/12],
         arrowsize = Vec3f(0.6, 0.6, 1.0),
         linewidth=0.4,
         fxaa=true)
-    !isnothing(plots) && push!(plots, p)
+    !isnothing(plot_list) && push!(plot_list, p)
 end
 
 """
-    animate_attention(chain::Backboner.Protein.Chain, attention::AbstractArray{<:Real, 3}; kwargs...)
+    animate_attention(chain::Protein.Chain, attention::AbstractArray{<:Real, 3}; kwargs...)
 """
 function animate_attention(
-    chain::Backboner.Protein.Chain, attention::AbstractArray{<:Real, 3};
+    chain::Protein.Chain, attention::AbstractArray{<:Real, 3};
     azimuth_start = 1, azimuth_end = -6, output_file::String = "attention.mp4",
     ribbon_colorscheme = :glasgow,
     attention_colorscheme = :hsv,
     end_padding = 3, grow_limits = false, from_centroid = false,
     frames_per_residue::Int = 10, framerate::Int = 30, show_rotation_frame = false,
-    rotation_frame_lightness = 0.5, kwargs...
+    kwargs...
 )
-    frames = Backboner.Frames(chain.backbone, Backboner.Protein.STANDARD_TRIANGLE_ANGSTROM)
+    frames = Frames(chain.backbone, Protein.STANDARD_TRIANGLE_ANGSTROM)
     if from_centroid
         points = frames.locations
     else
-        points = Backboner.Protein.carbonyl_coords(chain)
+        points = Protein.alphacarbon_coords(chain)
     end
 
     attention = PointAttention(points, attention)
 
     fig = Figure();
-    ax = Axis3(fig[1, 1], protrusions=(20, 20, 10, 10), perspectiveness=0.2, aspect=:data);
+    ax = Axis3(fig[1, 1], protrusions=(20, 20, 10, 10), perspectiveness=0.2, aspect=:data, viewmode=:fit);
     hidespines!(ax)
     hidedecorations!(ax)
 
@@ -55,7 +56,7 @@ function animate_attention(
     # Aggregate all the plots from each frame, such that they can be deleted.
     # Ribbon plots are actually made up of multiple plots, so each subplot gets added to the list.
     # A possible optimization is only deleting changed segments of the ribbon plot (e.g. last segment, and coils with emerging beta sheets)
-    plots = Vector{AbstractPlot}()
+    plot_list = Vector{AbstractPlot}()
 
     n = length(chain)
     k = frames_per_residue
@@ -67,19 +68,20 @@ function animate_attention(
         if x % 1 == 0 && x <= n
             i = round(Int, x)
 
-            for plot in plots
+            for plot in plot_list
                 delete!(ax.scene, plot)
             end
-            empty!(plots)
+            empty!(plot_list)
 
-            show_rotation_frame && render_rotation_frame!(ax, chain, frames, i, rotation_frame_lightness, plots=plots)
+            subchain = Protein.Chain(@view(chain.backbone[1:3i]), ssvector=chain.ssvector[1:i])
+            r = ribbon!(ax, [subchain], colors=[LinRange(0, i/n, i)], colormap=ribbon_colorscheme)
+            push!(plot_list, r)
 
-            subchain = Backboner.Protein.Chain(@view(chain.backbone[1:3i]), ssvector=chain.ssvector[1:i])
-            ribbon!(ax, [subchain], colorscheme=ribbon_colorscheme, color_vectors=[range(0, i/length(chain), i)], plots=plots)
+            show_rotation_frame && render_rotation_frame!(ax, chain, frames, i; plot_list)
 
             try
                 H = size(attention.intensities, 1)
-                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=attention_colorscheme[isone(H) ? [0.0] : range(0, 1, H)]; plots, kwargs...)
+                Attention.draw_attention_slice!(ax, i, attention, threshold=0.01, colors=range(0, !isone(H), H), colormap=attention_colorscheme; plot_list, kwargs...)
             catch e
                 println("Got $e while attempting to render attention for residue $i.")
             end

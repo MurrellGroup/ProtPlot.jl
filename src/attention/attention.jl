@@ -1,4 +1,10 @@
+# This code doesn't really belong in this package, but was left here for convenience.
+
 module Attention
+
+using ..ProtPlot
+using Backboner
+using Makie
 
 export PointAttention
 
@@ -22,12 +28,12 @@ end
 
 function draw_lines_from_point!(container,
     point::P, other_points::AbstractVector{P}, linewidths::AbstractVector{<:Real};
-    color = RGB(1, 1, 1), linewidth_factor = 3.0, plots = nothing, kwargs...
+    color = RGB(1, 1, 1), linewidth_factor = 3.0, plot_list = nothing, kwargs...
 ) where P
     length(other_points) == length(linewidths) || throw(ArgumentError("The number of linewidths must match the number of other points.")) 
     xs, ys, zs = [reduce(vcat, ([point[i], other_point[i]] for other_point in other_points); init=Vector{eltype(point)}()) for i in 1:3]
     p = linesegments!(container, xs, ys, zs; linewidth=linewidths .* linewidth_factor, color, transparency=true, kwargs...)
-    !isnothing(plots) && push!(plots, p)
+    !isnothing(plot_list) && push!(plot_list, p)
 end
 
 """
@@ -37,7 +43,7 @@ The thickness of the lines should be proportional to the value in the attention 
 """
 function draw_attention!(container,
     point::P, other_points::AbstractVector{P}, intensity_matrix::AbstractMatrix{<:Real};
-    threshold::Real=1.0, colors=fill(RGB(1, 1, 1), size(intensity_matrix, 1)), kwargs...
+    colors, colormap=:jet, threshold::Real=1.0, colorrange=(0,1), kwargs...
 ) where P
     h, l = size(intensity_matrix)
     #println(h, " ", l, " ", length(other_points))
@@ -45,7 +51,7 @@ function draw_attention!(container,
     for i in 1:h
         intensity_vector = @view intensity_matrix[i, :]
         js = intensity_vector .> threshold # TODO: alternatively get the K largest values
-        draw_lines_from_point!(container, point, @view(other_points[js]), @view(intensity_vector[js]); color=colors[i], kwargs...)
+        draw_lines_from_point!(container, point, @view(other_points[js]), @view(intensity_vector[js]); color=colors[i], colormap, colorrange, kwargs...)
     end
     return nothing
 end
