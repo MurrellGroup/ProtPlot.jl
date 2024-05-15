@@ -66,17 +66,15 @@ function segments(chain::Protein.Chain)
     ssvector = chain.ssvector
     ss_names = [SS_NAME_DICT[ss] for ss in ssvector]
     segment_ranges = Tuple{Symbol, UnitRange{Int}}[]
-    start_idx = 1
+    start_i = 1
 
-    for i in 2:length(ss_names)
-        if ss_names[i] != ss_names[start_idx]
-            push!(segment_ranges, (ss_names[start_idx], start_idx:i-1))
-            start_idx = i
+    for (i, ss_name) in enumerate(ss_names)
+        if ss_name != ss_names[start_i]
+            push!(segment_ranges, (ss_names[start_i], start_i:i-1))
+            start_i = i
         end
     end
-
-    # Push the last segment
-    push!(segment_ranges, (ss_names[start_idx], start_idx:length(ss_names)))
+    push!(segment_ranges, (ss_names[start_i], start_i:length(ss_names)))
 
     return segment_ranges
 end
