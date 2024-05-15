@@ -1,34 +1,38 @@
-# <img width="25%" src="./sticker.png" align="right" /> ProtPlot
+# <img width="25%" src="./images/sticker.png" align="right" /> ProtPlot
 
 [![Latest Release](https://img.shields.io/github/release/MurrellGroup/ProtPlot.jl.svg)](https://github.com/MurrellGroup/ProtPlot.jl/releases/latest)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/license/MIT)
 [![Build Status](https://github.com/MurrellGroup/ProtPlot.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/MurrellGroup/ProtPlot.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/MurrellGroup/ProtPlot.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/MurrellGroup/ProtPlot.jl)
 
-ProtPlot is a Julia package for rendering 3D protein ribbon plots using [GLMakie.jl](https://github.com/JuliaPlots/GLMakie.jl).
+ProtPlot is a Julia package for rendering 3D protein ribbon using [Makie.jl](https://github.com/MakieOrg/Makie.jl).
 
-## Usage
+## Overview
 
-ProtPlot offers two primary functions: `ribbon` and `ribbon!`:
-- `ribbon`: Creates a new interactive window to render the ribbon plot.
-- `ribbon!`: Renders the ribbon plot within an existing container (e.g., `Scene` or `Axis3`).
+ProtPlot exports the Ribbon plot:
+- `ribbon`: makes a static render of the ribbon.
+- `ribbon!`: renders the ribbon plot within an existing container (e.g., `Scene` or `Axis3`).
+- `ribbon_scene`: creates an interactive Scene to render the ribbon.
 
-### Example usage
+### Examples
+
+A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function. Alternatively, you can pass a single chain, or a PDB file path. 
 
 ```julia
+using GLMakie # use the GLMakie backend
 using ProtPlot
 
 # Load protein data from a PDB file
-protein = readpdb("test/data/1ZAK.pdb");
+chains = readpdb("test/data/1ZAK.pdb");
 
-# Create and display a ribbon plot in a new window
-ribbon(protein, backgroundcolor=:black, colorscheme=:jet)
+# Create and display a ribbon plot in an interactive window
+ribbon_scene(chains, backgroundcolor=:black, colormap=:jet)
 ```
-This example will open an interactive window featuring a ribbon plot of the protein with a black background and colors based on the jet colormap.
+![1ASS.pdb](images/image.png)
 
 ### Customizing colors
 
-To customize colors at the residue level, use the color_vectors keyword argument. This argument accepts a vector of vectors, where each inner vector contains colors or numeric values between 0 and 1, representing the colors of each residue in a chain. If numbers are passed instead of colors, they will be converted according to the colorscheme.
+Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each inner vector contains values between 0 and 1, representing the colors of each residue in a chain according to the `colormap`. These colors are recursively passed to the rendering functions, ensuring that each residue is colored appropriately.
 
 ### Camera controls
 
@@ -36,7 +40,7 @@ Makie allows programmatic control over the [camera](https://docs.makie.org/stabl
 Use the `camcontrols` keyword to control the initial view:
 
 ```julia
-using GLMakie    # to make `Vec3f` available
+using GLMakie    # makes `Vec3f` available
 
-ribbon(protein, camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
+ribbon_scene(chains, camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
