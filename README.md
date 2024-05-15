@@ -1,4 +1,4 @@
-# <img width="25%" src="./images/sticker.png" align="right" /> ProtPlot
+# <img width="25%" src="./images/all_ca_points.png" align="right" /> ProtPlot
 
 [![Latest Release](https://img.shields.io/github/release/MurrellGroup/ProtPlot.jl.svg)](https://github.com/MurrellGroup/ProtPlot.jl/releases/latest)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/license/MIT)
@@ -14,7 +14,7 @@ ProtPlot exports the Ribbon plot:
 - `ribbon!`: renders the ribbon plot within an existing container (e.g., `Scene` or `Axis3`).
 - `ribbon_scene`: creates an interactive Scene to render the ribbon.
 
-### Examples
+## Examples
 
 A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function. Alternatively, you can pass a single chain, or a PDB file path. 
 
@@ -22,25 +22,31 @@ A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you
 using GLMakie # use the GLMakie backend
 using ProtPlot
 
-# Load protein data from a PDB file
-chains = readpdb("test/data/1ZAK.pdb");
-
 # Create and display a ribbon plot in an interactive window
-ribbon_scene(chains, backgroundcolor=:black, colormap=:jet)
+ribbon_scene("test/data/1ASS.pdb", backgroundcolor=:black, colormap=:jet)
 ```
-![1ASS.pdb](images/image.png)
+![1ASS.pdb](images/1ASS.png)
 
-### Customizing colors
+## Customizing colors
 
 Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each inner vector contains values between 0 and 1, representing the colors of each residue in a chain according to the `colormap`. These colors are recursively passed to the rendering functions, ensuring that each residue is colored appropriately.
 
-### Camera controls
+```julia
+# Load protein data from a PDB file
+chains = readpdb("test/data/1ZAK.pdb")
+
+colors = rand.(length.(chains))
+
+ribbon_scene(chains, colors=colors)
+```
+![1ZAK.pdb](images/1ZAK.png)
+
+## Camera controls
 
 Makie allows programmatic control over the [camera](https://docs.makie.org/stable/explanations/cameras/index.html).
 Use the `camcontrols` keyword to control the initial view:
 
 ```julia
-using GLMakie    # makes `Vec3f` available
-
-ribbon_scene(chains, camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
+ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
+![camera-1ASS.pdb](images/camera-1ASS.png)
