@@ -1,28 +1,22 @@
 function coil_surface(
-    points::AbstractMatrix{T};
-    radius = 1.0,
-    spline_quality = 20,
-    slice_quality = 20,
-    ghost_control_start = nothing,
-    ghost_control_end = nothing,
-    kwargs...
+    attributes::Attributes,
+    all_ca_points::AbstractMatrix{T};
+    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2),
 ) where T <: Real
-    spline_quality = size(points, 2) == 2 ? 2 : spline_quality
-    path = spline(points, ghost_control_start, ghost_control_end, m=spline_quality, k=min(3, size(points, 2)-1))
+    radius = attributes.coil_radius[]
+    spline_quality = attributes.coil_spline_quality[]
+    slice_quality = attributes.coil_slice_quality[]
 
-    N = size(path, 2)
-    angles = LinRange(0, 2π, slice_quality)
-    surface_vertices = zeros(T, 3, N, length(angles))
+    points = all_ca_points[:, segment_range]
+    n_points = size(points, 2)
+    n_path_points = n_points * spline_quality
+    path = spline(all_ca_points; N=n_path_points, r=segment_range)
 
-    # Precompute tangents and initialize normals
-    tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N)
-    normals = zeros(T, 3, N)
+    tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(n_path_points, i+1)]) for i in 1:n_path_points)
+    normals = zeros(T, 3, n_path_points)
 
-    # Initial normal vector (arbitrary, but not aligned with the first tangent)
     normals[:, 1] = abs(tangents[1, 1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
-
-    # Propagate the normal vector along the path
-    for idx in 2:N
+    for idx in 2:n_path_points
         prev_normal = normals[:, idx-1]
         t = tangents[:, idx]
         projected_normal = prev_normal - dot(t, prev_normal) * t
@@ -32,8 +26,9 @@ function coil_surface(
         normals[:, idx] = normalize!(projected_normal)
     end
 
-    # Generate surface vertices
-    for idx in 1:N
+    angles = LinRange(0, 2π, slice_quality)
+    surface_vertices = zeros(T, 3, n_path_points, length(angles))
+    for idx in 1:n_path_points
         t = tangents[:, idx]
         n = normals[:, idx]
         b = cross(n, t)

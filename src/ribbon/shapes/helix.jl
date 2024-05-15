@@ -1,15 +1,19 @@
+curved_path_normal(p1, p2, p3) = -normalize!(p1 - p2 + p3 - p2)
+
 # normal depends on second derivative of the path
 # does weird twist when second derivative changes too quickly
 function helix_surface(
-    points::AbstractMatrix{T};
-    radius = 1.0,
-    width_factor = 1.0,
-    thickness_factor = 1.0,
-    spline_quality = 20,
-    slice_quality = 20,
-    kwargs...
+    attributes::Attributes,
+    all_ca_points::AbstractMatrix{T};
+    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2)
 ) where T <: Real
-    path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
+    radius = attributes.helix_radius[]
+    width_factor = attributes.helix_width[]
+    thickness_factor = attributes.helix_thickness[]
+    spline_quality = attributes.helix_spline_quality[]
+    slice_quality = attributes.helix_slice_quality[]
+
+    path = spline(all_ca_points; N=length(segment_range) * spline_quality, r=segment_range)
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)
     surface_vertices = zeros(T, 3, N, length(angles))

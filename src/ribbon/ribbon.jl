@@ -1,71 +1,66 @@
-module Ribbon
-
-export ribbon, ribbon!
+export Ribbon, ribbon, ribbon!, ribbon_scene
 
 using Backboner
-using GLMakie
-using Colors
-using ColorSchemes
-using LinearAlgebra
+using Makie
 
-default_colorscheme = colorschemes[:jet]
+@recipe(Ribbon, chains) do scene
+    Attributes(
+        backgroundcolor = :black,
+        colormap = :jet,
+        colors = nothing,
+
+        coil_radius = 0.2,
+        coil_spline_quality = 20,
+        coil_slice_quality = 20,
+
+        helix_radius = 1.0,
+        helix_width = 1.0,
+        helix_thickness = 0.25,
+        helix_spline_quality = 20,
+        helix_slice_quality = 20,
+
+        strand_width = 2.0,
+        strand_thickness = 0.5,
+        strand_spline_quality = 20,
+        strand_arrow_head_length = 5,
+        strand_arrow_head_width = 3.5,
+    )
+end
 
 include("utils.jl")
 include("secondarystructure.jl")
-include("shapes/shapes.jl")
-include("segment.jl")
 include("render.jl")
 
-"""
-    ribbon!(container, protein::AbstractVector{Protein.Chain}; kwargs...)
+# TODO: observe chains and re-render when they change
+function Makie.plot!(ribbon::Ribbon{Tuple{Vector{Protein.Chain}}})
+    chains = ribbon[1]
 
-Renders a protein as a ribbon diagram onto a container.
+    chains = deepcopy(chains[])
+    _assign_secondary_structure!(chains)
+    isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
+    render!(ribbon, chains)
 
-Keyword arguments:
-- `colorscheme::ColorScheme = ColorSchemes.jet`: The color scheme to use for the ribbon.
-- `color_vectors::Vector{<:Vector{<:Union{AbstractFloat, RGB}}} = [LinRange(0, 1, length(chain)) for chain in protein]`:
-    The color vectors to use for each chain. The length of each vector must match the length of the corresponding chain.
-    The vectors must be either vectors of real number between 0 and 1, or vectors of RGB colors.
-"""
-function ribbon!(
-    container,
-    protein::AbstractVector{Protein.Chain};
-    colorscheme::Union{ColorScheme, Symbol} = default_colorscheme,
-    color_vectors::AbstractVector{<:AbstractVector{<:Union{Real, RGB}}} = [LinRange(0, 1, length(chain)) for chain in protein],
-    kwargs...
-)
-    protein_assigned = ASS.assign_secondary_structure!(deepcopy(protein))
-
-    colorscheme isa Symbol && (colorscheme = colorschemes[colorscheme])
-    if eltype(eltype(color_vectors)) <: Real
-        color_vectors = [colorscheme[color_vector] for color_vector in color_vectors]
-    end
-
-    render!(container, protein_assigned; colorscheme=colorscheme, color_vectors=color_vectors, kwargs...)
-
-    return container
+    return ribbon
 end
 
-"""
+Makie.convert_arguments(::Type{<:Ribbon}, chain::Protein.Chain) = ([chain],)
+
+Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
+
+#="""
     ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
 Render a protein as a ribbon diagram. The display will be automatically centered on `protein`,
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
 
 See `render!` for additional keyword arguments.
-"""
-function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+"""=#
+function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
-    ribbon!(scene, protein; kwargs...)
+    ribbon!(scene, args...; kwargs...)
     if isempty(camcontrols)
         center!(scene)
     end
-    display(scene)
     return scene
-end
-
-ribbon!(container, pdb_file::String; kwargs...) = ribbon!(container, Protein.readpdb(pdb_file); kwargs...)
-ribbon(pdb_file::String; kwargs...) = ribbon(Protein.readpdb(pdb_file); kwargs...)
-
 end
