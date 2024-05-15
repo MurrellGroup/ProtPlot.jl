@@ -37,7 +37,7 @@ chains = readpdb("test/data/1ZAK.pdb")
 
 colors = rand.(length.(chains))
 
-ribbon_scene(chains, colors=colors)
+ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
 ![1ZAK.pdb](images/1ZAK.png)
 
