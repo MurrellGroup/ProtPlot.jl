@@ -1,4 +1,4 @@
-export ribbon, ribbon!
+export Ribbon, ribbon, ribbon!, ribbon_scene
 
 using Backboner
 using Makie
@@ -55,9 +55,6 @@ unless the user supplies `camcontrols` (see Makie's camera documentation for det
 
 See `render!` for additional keyword arguments.
 """=#
-
-export ribbon_scene
-
 function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
