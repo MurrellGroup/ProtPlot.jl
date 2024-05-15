@@ -1,13 +1,11 @@
-using Makie
+using GLMakie
 using ProtPlot
 using Test
 
-using Backboner
-
 @testset "ProtPlot.jl" begin
-    chains = readpdb("data/1ZAK.pdb")
-    @test ribbon(chains) isa Makie.AbstractPlot # bad test but at least it runs
+    @test ribbon_scene("data/1ASS.pdb") isa Scene # shitty test but at least it confirms it doesn't throw an error
 
-    scene = ribbon(protein; camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
+    camcontrols = (; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1))
+    scene = ribbon_scene("data/1ASS.pdb"; camcontrols)
     @test scene.camera.eyeposition[] == Vec3f(160, -75, 0)
 end
