@@ -18,16 +18,26 @@ function get_surface_vertices(ribbon::Ribbon, ::Val{:Strand}, segment_range::Uni
     return strand_surface(ribbon.attributes, ca_points, o_points; segment_range)
 end
 
-function render!(ribbon::Ribbon, chain::Protein.Chain, colors)
+function render!(
+    ribbon::Ribbon,
+    chain::Protein.Chain,
+    color::AbstractVector{<:Real},
+)
     for (ss_name, segment_range) in segments(chain)
         surface_vertices = get_surface_vertices(ribbon, Val(ss_name), segment_range, chain)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
-            color=expand_colors(colors[segment_range], size(surface_vertices, 2)), colormap=ribbon.colormap, colorrange=(0,1))
+            color=expand_colors(color[segment_range], size(surface_vertices, 2)), colormap=ribbon.colormap, colorrange=(0,1))
     end
     return ribbon
 end
 
-function draw_lines_between_subchains!(ribbon::Ribbon, chain::Protein.Chain, subchain_ranges::Vector{UnitRange{Int}}, color; linewidth=2)
+function draw_lines_between_subchains!(
+    ribbon::Ribbon,
+    chain::Protein.Chain,
+    subchain_ranges::Vector{UnitRange{Int}},
+    color::Symbol;
+    linewidth=2,
+)
     subchains = get_subchain.(Ref(chain), subchain_ranges)
     for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
         startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
