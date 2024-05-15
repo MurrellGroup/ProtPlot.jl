@@ -25,7 +25,7 @@ using ProtPlot
 # Create and display a ribbon plot in an interactive window
 ribbon_scene("test/data/1ASS.pdb", backgroundcolor=:black, colormap=:jet)
 ```
-![1ASS.pdb](images/1ASS.png)
+![plain gradient](images/1ASS.png)
 
 ## Customizing colors
 
@@ -33,13 +33,13 @@ Use the `colors` keyword argument to customize colors at the residue level. This
 
 ```julia
 # Load protein data from a PDB file
-chains = readpdb("test/data/1ZAK.pdb")
+chains = readpdb("test/data/1ASS.pdb")
 
 colors = rand.(length.(chains))
 
 ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
-![1ZAK.pdb](images/1ZAK.png)
+![random colors](images/color-1ASS.png)
 
 ## Camera controls
 
@@ -49,4 +49,4 @@ Use the `camcontrols` keyword to control the initial view:
 ```julia
 ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
-![camera-1ASS.pdb](images/camera-1ASS.png)
+![camera](images/camera-1ASS.png)
