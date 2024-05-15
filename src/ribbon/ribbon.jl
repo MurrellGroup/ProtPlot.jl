@@ -22,23 +22,34 @@ using Makie
         strand_width = 2.0,
         strand_thickness = 0.5,
         strand_spline_quality = 20,
+        strand_arrow_head_length = 5,
+        strand_arrow_head_width = 3.5,
     )
 end
 
 include("utils.jl")
 include("secondarystructure.jl")
-include("render/render.jl")
+include("render.jl")
 
-function Makie.plot!(ribbon::Ribbon{Vector{Protein.Chain}})
-    chains = deepcopy(ribbon[1])
-    _assign_secondary_structure!(chains)
+# TODO: observe chains and re-render when they change
+function Makie.plot!(ribbon::Ribbon{Tuple{Vector{Protein.Chain}}})
+    chains = ribbon[1]
 
-    isnothing(ribbon.colors) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in protein])
+    function update_plot(chains::Observable{Vector{Protein.Chain}})
+        chains = deepcopy(chains[])
+        _assign_secondary_structure!(chains)
+        isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
+        render!(ribbon, chains)
+    end
 
-    render!(ribbon, chains)
+    Makie.Observables.onany(update_plot, chains)
+
+    update_plot(chains)
 
     return ribbon
 end
+
+Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
 
 #="""
     ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
@@ -47,15 +58,16 @@ Render a protein as a ribbon diagram. The display will be automatically centered
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
 
 See `render!` for additional keyword arguments.
-"""
-function ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+"""=#
+
+export ribbon_scene
+
+function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
-    ribbon!(scene, protein; kwargs...)
+    ribbon!(scene, args...; kwargs...)
     if isempty(camcontrols)
         center!(scene)
     end
     return scene
-end=#
-
-#ribbon!(container, pdb_file::String; kwargs...) = ribbon!(container, Protein.readpdb(pdb_file); kwargs...)
+end

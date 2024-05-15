@@ -1,10 +1,16 @@
-function coil_surface(points::AbstractMatrix{T}, attributes) where T <: Real
-    radius = attributes.coil_radius
-    spline_quality = attributes.coil_spline_quality
-    slice_quality = attributes.coil_slice_quality
+function coil_surface(
+    attributes::Attributes,
+    all_points::AbstractMatrix{T};
+    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2),
+) where T <: Real
+    radius = attributes.coil_radius[]
+    spline_quality = attributes.coil_spline_quality[]
+    slice_quality = attributes.coil_slice_quality[]
+
+    points = all_points[:, segment_range]
 
     spline_quality = size(points, 2) == 2 ? 2 : spline_quality
-    path = spline(points, m=spline_quality, k=min(3, size(points, 2)-1))
+    path = spline(all_points; N=size(points, 2) * spline_quality, r=segment_range)
 
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)

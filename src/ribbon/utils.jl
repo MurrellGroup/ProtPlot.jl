@@ -1,8 +1,4 @@
-function smooth_color_vector(colorscheme, N::Integer)
-    return colorscheme[LinRange(0, 1, N)]
-end
-
-function expand_colors(colors::Vector, N::Integer)
+function expand_colors(colors::AbstractVector, N::Integer)
     L = length(colors)
     repeats = ceil(Int, N / L)
     total_elements = repeats * L
@@ -33,4 +29,8 @@ function Base.split(chain::Protein.Chain; resnums=true, cn_distance_tolerance=2)
     end
     push!(ranges, start_idx+1:length(chain))
     return ranges
+end
+
+function Base.getindex(chain::Protein.Chain, I::AbstractVector{<:Integer})
+    Protein.Chain(Backbone(reshape(chain.backbone.coords, 3, 3, :)[:, :, I]); id=chain.id, modelnum=chain.modelnum, resnums=chain.resnums[I], aavector=chain.aavector[I], ssvector=chain.ssvector[I])
 end
