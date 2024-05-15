@@ -13,8 +13,6 @@ function helix_surface(
     spline_quality = attributes.helix_spline_quality[]
     slice_quality = attributes.helix_slice_quality[]
 
-    points = all_points[:, segment_range]
-
     path = spline(all_points; N=length(segment_range) * spline_quality, r=segment_range)
     N = size(path, 2)
     angles = LinRange(0, 2π, slice_quality)

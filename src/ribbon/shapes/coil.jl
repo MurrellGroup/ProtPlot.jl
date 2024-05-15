@@ -8,23 +8,15 @@ function coil_surface(
     slice_quality = attributes.coil_slice_quality[]
 
     points = all_points[:, segment_range]
+    n_points = size(points, 2)
+    n_path_points = n_points * spline_quality
+    path = spline(all_points; N=n_path_points, r=segment_range)
 
-    spline_quality = size(points, 2) == 2 ? 2 : spline_quality
-    path = spline(all_points; N=size(points, 2) * spline_quality, r=segment_range)
+    tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(n_path_points, i+1)]) for i in 1:n_path_points)
+    normals = zeros(T, 3, n_path_points)
 
-    N = size(path, 2)
-    angles = LinRange(0, 2π, slice_quality)
-    surface_vertices = zeros(T, 3, N, length(angles))
-
-    # Precompute tangents and initialize normals
-    tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(N, i+1)]) for i in 1:N)
-    normals = zeros(T, 3, N)
-
-    # Initial normal vector (arbitrary, but not aligned with the first tangent)
     normals[:, 1] = abs(tangents[1, 1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
-
-    # Propagate the normal vector along the path
-    for idx in 2:N
+    for idx in 2:n_path_points
         prev_normal = normals[:, idx-1]
         t = tangents[:, idx]
         projected_normal = prev_normal - dot(t, prev_normal) * t
@@ -34,8 +26,9 @@ function coil_surface(
         normals[:, idx] = normalize!(projected_normal)
     end
 
-    # Generate surface vertices
-    for idx in 1:N
+    angles = LinRange(0, 2π, slice_quality)
+    surface_vertices = zeros(T, 3, n_path_points, length(angles))
+    for idx in 1:n_path_points
         t = tangents[:, idx]
         n = normals[:, idx]
         b = cross(n, t)

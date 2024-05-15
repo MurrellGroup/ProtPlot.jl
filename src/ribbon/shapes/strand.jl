@@ -71,7 +71,6 @@ function strand_surface(
     path_length = cumulative_path_length[end]
     arrow_body_length = path_length - arrow_head_length
 
-    # Find the index where the arrow head should start
     arrow_start_index = findfirst(>(arrow_body_length), cumulative_path_length)
     l = arrow_start_index / n_path_points
     arrow = arrow_function(l, width, arrow_head_width)
