@@ -8,7 +8,7 @@ using Makie
         backgroundcolor = :black,
         colormap = :jet,
         colors = nothing,
-        
+
         coil_radius = 0.2,
         coil_spline_quality = 20,
         coil_slice_quality = 20,
@@ -35,19 +35,15 @@ include("render.jl")
 function Makie.plot!(ribbon::Ribbon{Tuple{Vector{Protein.Chain}}})
     chains = ribbon[1]
 
-    function update_plot(chains::Observable{Vector{Protein.Chain}})
-        chains = deepcopy(chains[])
-        _assign_secondary_structure!(chains)
-        isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
-        render!(ribbon, chains)
-    end
-
-    Makie.Observables.onany(update_plot, chains)
-
-    update_plot(chains)
+    chains = deepcopy(chains[])
+    _assign_secondary_structure!(chains)
+    isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
+    render!(ribbon, chains)
 
     return ribbon
 end
+
+Makie.convert_arguments(::Type{<:Ribbon}, chain::Protein.Chain) = ([chain],)
 
 Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
 
