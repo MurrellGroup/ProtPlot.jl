@@ -27,7 +27,8 @@ function render!(ribbon::Ribbon, chain::Protein.Chain, colors)
     return ribbon
 end
 
-function draw_lines_between_subchains!(ribbon::Ribbon, subchains::AbstractVector{Protein.Chain}, color; linewidth=2)
+function draw_lines_between_subchains!(ribbon::Ribbon, chain::Protein.Chain, subchain_ranges::Vector{UnitRange{Int}}, color; linewidth=2)
+    subchains = get_subchain.(Ref(chain), subchain_ranges)
     for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
         startpoint, endpoint = subchains[i].backbone[end], subchains[j].backbone[begin]
         n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
@@ -39,16 +40,11 @@ end
 
 function render!(ribbon::Ribbon, chains::Vector{Protein.Chain})
     for (chain, colors) in zip(chains, ribbon.colors[])
-        subchain_ranges = split(chain)
-        if length(subchain_ranges) == 1
-            render!(ribbon, chain, colors)
-        else
-            subchains = [chain[r] for r in subchain_ranges]
-            for (subchain, r) in zip(subchains, subchain_ranges)
-                render!(ribbon, subchain, colors[r])
-            end
-            draw_lines_between_subchains!(ribbon, subchains, :lightgray)
+        subchain_ranges = get_subchain_ranges(chain)
+        for r in subchain_ranges
+            render!(ribbon, get_subchain(chain, r), colors[r])
         end
+        draw_lines_between_subchains!(ribbon, chain, subchain_ranges, :lightgray)
     end
     return ribbon
 end
