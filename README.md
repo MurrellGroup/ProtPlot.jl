@@ -1,4 +1,4 @@
-# <img width="25%" src="./images/all_ca_points.png" align="right" /> ProtPlot
+# <img width="25%" src="./images/sticker.png" align="right" /> ProtPlot
 
 [![Latest Release](https://img.shields.io/github/release/MurrellGroup/ProtPlot.jl.svg)](https://github.com/MurrellGroup/ProtPlot.jl/releases/latest)
 [![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/license/MIT)
