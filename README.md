@@ -39,7 +39,7 @@ colors = rand.(length.(chains))
 
 ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
-![random colors](images/color-1ASS.png)
+![random colors](images/1ASS-color.png)
 
 ## Camera controls
 
@@ -49,4 +49,4 @@ Use the `camcontrols` keyword to control the initial view:
 ```julia
 ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
-![camera](images/camera-1ASS.png)
+![camera](images/1ASS-camera.png)
