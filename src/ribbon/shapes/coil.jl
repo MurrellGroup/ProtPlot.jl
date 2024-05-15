@@ -1,16 +1,16 @@
 function coil_surface(
     attributes::Attributes,
-    all_points::AbstractMatrix{T};
+    all_ca_points::AbstractMatrix{T};
     segment_range::UnitRange{Int} = 1:size(all_midpoints, 2),
 ) where T <: Real
     radius = attributes.coil_radius[]
     spline_quality = attributes.coil_spline_quality[]
     slice_quality = attributes.coil_slice_quality[]
 
-    points = all_points[:, segment_range]
+    points = all_ca_points[:, segment_range]
     n_points = size(points, 2)
     n_path_points = n_points * spline_quality
-    path = spline(all_points; N=n_path_points, r=segment_range)
+    path = spline(all_ca_points; N=n_path_points, r=segment_range)
 
     tangents = stack(path_tangent(path[:, max(1, i-1)], path[:, i], path[:, min(n_path_points, i+1)]) for i in 1:n_path_points)
     normals = zeros(T, 3, n_path_points)
