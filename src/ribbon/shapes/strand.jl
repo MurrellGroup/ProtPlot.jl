@@ -75,7 +75,7 @@ function strand_surface(
     l = arrow_start_index / n_path_points
     arrow = arrow_function(l, width, arrow_head_width)
 
-    surface_vertices = zeros(T, 3, n_path_points, 6)
+    surface_vertices = zeros(T, 3, n_path_points, 5)
     for i in 1:n_path_points
         t = (i - 1) / (n_path_points - 1)
         next_t = i / (n_path_points - 1)
@@ -92,7 +92,6 @@ function strand_surface(
         surface_vertices[:, i, 3] = midpoint .- half_normal .- arrow_vector
         surface_vertices[:, i, 4] = midpoint .- half_normal .+ arrow_vector
         surface_vertices[:, i, 5] = surface_vertices[:, i, 1]
-        surface_vertices[:, i, 6] = surface_vertices[:, i, 3]
     end
 
     surface_vertices[:, 1, :] .= midpoint_path[:, 1]
