@@ -9,7 +9,7 @@ using Makie
         colormap = :jet,
         colors = nothing,
 
-        coil_radius = 0.2,
+        coil_diameter = 0.4,
         coil_spline_quality = 20,
         coil_slice_quality = 20,
 
