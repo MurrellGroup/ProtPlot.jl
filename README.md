@@ -29,7 +29,7 @@ ribbon_scene("test/data/1ASS.pdb", backgroundcolor=:black, colormap=:jet)
 
 ## Customizing colors
 
-Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each inner vector contains values between 0 and 1, representing the colors of each residue in a chain according to the `colormap`. These colors are recursively passed to the rendering functions, ensuring that each residue is colored appropriately.
+Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each vector contains values between 0 and 1, representing the colors of each residue in their respective chains according to the `colormap`.
 
 ```julia
 # Load protein data from a PDB file
