@@ -13,9 +13,8 @@ using Makie
         coil_spline_quality = 20,
         coil_slice_quality = 20,
 
-        helix_radius = 1.0,
-        helix_width = 1.0,
-        helix_thickness = 0.25,
+        helix_width = 2.0,
+        helix_thickness = 0.5,
         helix_spline_quality = 20,
         helix_slice_quality = 20,
 
@@ -33,11 +32,13 @@ include("render.jl")
 
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{Tuple{Vector{Protein.Chain}}})
-    chains = ribbon[1]
+    chains = ribbon[1][]
 
-    chains = deepcopy(chains[])
+    chains = deepcopy(chains)
+    Protein.assign_oxygens!.(chains)
     _assign_secondary_structure!(chains)
     isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
+    #empty!(ribbon.plots)
     render!(ribbon, chains)
 
     return ribbon
@@ -47,14 +48,12 @@ Makie.convert_arguments(::Type{<:Ribbon}, chain::Protein.Chain) = ([chain],)
 
 Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
 
-#="""
-    ribbon(protein::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+"""
+    ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
-Render a protein as a ribbon diagram. The display will be automatically centered on `protein`,
+Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
-
-See `render!` for additional keyword arguments.
-"""=#
+"""
 function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
