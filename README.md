@@ -41,10 +41,27 @@ ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
 ![random colors](images/1ASS-color.png)
 
+## Attributes
+You may customize the geometry of the ribbon by specifying the value of attributes in the keyword arguments of your call. Here's a list of available attributes and their defaults:
+- coil_diameter = 0.4
+- coil_spline_quality = 20
+- coil_slice_quality = 20
+
+- helix_width = 2.0
+- helix_thickness = 0.5
+- helix_spline_quality = 20
+- helix_slice_quality = 20
+
+- strand_width = 2.0
+- strand_thickness = 0.5
+- strand_spline_quality = 20
+- strand_arrow_head_length = 5
+- strand_arrow_head_width = 3.5
+
 ## Camera controls
 
 Makie allows programmatic control over the [camera](https://docs.makie.org/stable/explanations/cameras/index.html).
-Use the `camcontrols` keyword to control the initial view:
+Use the `camcontrols` keyword to control the initial view in a `ribbon_scene` call:
 
 ```julia
 ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
