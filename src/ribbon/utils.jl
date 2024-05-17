@@ -31,7 +31,3 @@ function get_subchain_ranges(chain::Protein.Chain; resnums=true, cn_distance_tol
     push!(ranges, start_i+1:length(chain))
     return ranges
 end
-
-function get_subchain(chain::Protein.Chain, I::AbstractVector{<:Integer})
-    Protein.Chain(Backbone(reshape(chain.backbone.coords, 3, 3, :)[:, :, I]); id=chain.id, modelnum=chain.modelnum, resnums=chain.resnums[I], aavector=chain.aavector[I], ssvector=chain.ssvector[I])
-end
