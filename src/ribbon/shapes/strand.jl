@@ -13,8 +13,10 @@ function deintersect_ends!(path1::AbstractMatrix{T}, path2::AbstractMatrix{T}) w
     end
 end
 
-arrow_function(l=0.5, w=0.5, W=1.0) = let hw = w/2, hW = W/2 
-    t -> t > l ? hW*(t-1)/(l-1) : hw
+function arrow_function(l=0.5, w=0.5, W=1.0, d=0.0)
+    t -> t > l ?
+        (W-d)/(2*(l-1))*t + (d*l-W)/(2*(l-1)) :
+        w/2
 end
 
 function strand_midpoints(ca_points::AbstractMatrix{T}) where T <: Real
@@ -73,7 +75,7 @@ function strand_surface(
 
     arrow_start_index = findfirst(>(arrow_body_length), cumulative_path_length)
     l = arrow_start_index / n_path_points
-    arrow = arrow_function(l, width, arrow_head_width)
+    arrow = arrow_function(l, width, arrow_head_width, attributes.coil_diameter[])
 
     surface_vertices = zeros(T, 3, n_path_points, 5)
     for i in 1:n_path_points

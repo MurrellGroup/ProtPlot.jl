@@ -1,8 +1,8 @@
 include("shapes/shapes.jl")
 
 function get_surface_vertices(ribbon::Ribbon, ::Val{:Coil}, segment_range::UnitRange{Int}, chain::Protein.Chain)
-    adjusted_start = segment_range.start == 1 ? 1 : segment_range.start - 1
-    adjusted_end = segment_range.stop == length(chain) ? length(chain) : segment_range.stop + 1
+    adjusted_start = max(1, segment_range.start - 1)
+    adjusted_end = min(length(chain), segment_range.stop + 1)
     points = Protein.alphacarbon_coords(chain)
     return coil_surface(ribbon.attributes, points; segment_range=adjusted_start:adjusted_end)
 end
@@ -23,6 +23,7 @@ function render!(
     chain::Protein.Chain,
     color::AbstractVector{<:Real},
 )
+    length(chain) > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
     for (ss_name, segment_range) in segments(chain)
         surface_vertices = get_surface_vertices(ribbon, Val(ss_name), segment_range, chain)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
