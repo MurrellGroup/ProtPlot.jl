@@ -43,20 +43,20 @@ ribbon_scene(chains, colors=colors, colormap=:hsv)
 
 ## Attributes
 You may customize the geometry of the ribbon by specifying the value of attributes in the keyword arguments of your call. Here's a list of available attributes and their defaults:
-- coil_diameter = 0.4
-- coil_spline_quality = 20
-- coil_slice_quality = 20
+- `coil_diameter = 0.4`
+- `coil_spline_quality = 20`
+- `coil_slice_quality = 20`
 
-- helix_width = 2.0
-- helix_thickness = 0.5
-- helix_spline_quality = 20
-- helix_slice_quality = 20
+- `helix_width = 2.0`
+- `helix_thickness = 0.5`
+- `helix_spline_quality = 20`
+- `helix_slice_quality = 20`
 
-- strand_width = 2.0
-- strand_thickness = 0.5
-- strand_spline_quality = 20
-- strand_arrow_head_length = 5
-- strand_arrow_head_width = 3.5
+- `strand_width = 2.0`
+- `strand_thickness = 0.5`
+- `strand_arrow_head_length = 5.0`
+- `strand_arrow_head_width = 3.5`
+- `strand_spline_quality = 20`
 
 ## Camera controls
 
