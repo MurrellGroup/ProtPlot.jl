@@ -12,7 +12,7 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 
 [compat]
 AssigningSecondaryStructure = "0.3"
-Backboner = "0.9"
+Backboner = "0.9.7"
 Dierckx = "0.5"
 LinearAlgebra = "1"
 Makie = "0.21"
