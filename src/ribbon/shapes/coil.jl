@@ -1,7 +1,7 @@
 function coil_surface(
     attributes::Attributes,
     all_ca_points::AbstractMatrix{T};
-    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2),
+    segment_range::UnitRange{Int},
 ) where T <: Real
     diameter = attributes.coil_diameter[]
     spline_quality = attributes.coil_spline_quality[]

@@ -5,7 +5,7 @@ curved_path_normal(p1, p2, p3) = -normalize!(p1 - p2 + p3 - p2)
 function helix_surface(
     attributes::Attributes,
     all_ca_points::AbstractMatrix{T};
-    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2)
+    segment_range::UnitRange{Int},
 ) where T <: Real
     width = attributes.helix_width[]
     thickness = attributes.helix_thickness[]

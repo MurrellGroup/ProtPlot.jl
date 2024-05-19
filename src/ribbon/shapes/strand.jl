@@ -41,7 +41,7 @@ function strand_surface(
     attributes::Attributes,
     all_ca_points::AbstractMatrix{T},
     all_o_points::AbstractMatrix{T};
-    segment_range::UnitRange{Int} = 1:size(all_midpoints, 2),
+    segment_range::UnitRange{Int},
 ) where T <: Real
     width = attributes.strand_width[]
     thickness = attributes.strand_thickness[]
