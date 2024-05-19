@@ -36,3 +36,9 @@ function coil_surface(
     end
     return surface_vertices
 end
+
+function get_surface_segment(ribbon::Ribbon, ::Val{:Coil}, segment_range::UnitRange{Int}, chain::Protein.Chain)
+    adjusted_range = max(1, segment_range.start - 1):min(length(chain), segment_range.stop + 1)
+    points = Protein.alphacarbon_coords(chain)
+    return coil_surface(ribbon.attributes, points; segment_range=adjusted_range), adjusted_range
+end

@@ -100,3 +100,9 @@ function strand_surface(
 
     return surface_vertices
 end
+
+function get_surface_segment(ribbon::Ribbon, ::Val{:Strand}, segment_range::UnitRange{Int}, chain::Protein.Chain)
+    ca_points = Protein.alphacarbon_coords(chain)
+    o_points = Protein.oxygen_coords(chain) .|> eltype(ca_points)
+    return strand_surface(ribbon.attributes, ca_points, o_points; segment_range), segment_range
+end

@@ -29,3 +29,8 @@ function helix_surface(
 
     return surface_vertices
 end
+
+function get_surface_segment(ribbon::Ribbon, ::Val{:Helix}, segment_range::UnitRange{Int}, chain::Protein.Chain)
+    points = Protein.alphacarbon_coords(chain)
+    return helix_surface(ribbon.attributes, points; segment_range), segment_range
+end
