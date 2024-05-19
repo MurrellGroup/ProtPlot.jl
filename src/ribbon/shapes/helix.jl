@@ -21,7 +21,7 @@ function helix_surface(
         t = normalize(path_tangent(three_path_points...))
         n = normalize(cross(t, cross(curved_path_normal(three_path_points...), t)))
         b = cross(n, t)
-        for (j, v) in enumerate(LinRange(0, 2π, slice_quality))
+        for (j, v) in enumerate(range(0, 2π, slice_quality))
             offset = 0.5*thickness*cos(v) .* n .+ 0.5*width*sin(v) .* b
             surface_vertices[:, i, j] = path[:, i] .- offset
         end

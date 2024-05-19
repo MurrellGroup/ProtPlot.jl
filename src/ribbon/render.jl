@@ -29,7 +29,7 @@ function render!(ribbon::Ribbon, chain::Protein.Chain, color::AbstractVector{<:R
 end
 
 function render!(ribbon::Ribbon, chain::Protein.Chain, color::AbstractVector{<:Colorant}, colormap)
-    render!(ribbon, chain, LinRange(0, 1, length(color)), color)
+    render!(ribbon, chain, range(0, 1, length(color)), color)
 end
 
 function draw_lines_between_subchains!(

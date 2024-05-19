@@ -74,7 +74,7 @@ function animate_attention(
             empty!(plot_list)
 
             subchain = Protein.Chain(@view(chain.backbone[1:3i]), ssvector=chain.ssvector[1:i])
-            r = ribbon!(ax, [subchain], colors=[LinRange(0, i/n, i)], colormap=ribbon_colorscheme)
+            r = ribbon!(ax, [subchain], colors=[range(0, i/n, i)], colormap=ribbon_colorscheme)
             push!(plot_list, r)
 
             show_rotation_frame && render_rotation_frame!(ax, chain, frames, i; plot_list)

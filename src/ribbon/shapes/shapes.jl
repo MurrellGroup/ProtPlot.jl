@@ -12,7 +12,7 @@ function spline(
 )
     L = size(points, 2)
     spl = Dierckx.ParametricSpline(1:L, points; k)
-    return Dierckx.evaluate(spl, LinRange(r.start, r.stop, N))
+    return Dierckx.evaluate(spl, range(r.start, r.stop, N))
 end
 
 include("coil.jl")

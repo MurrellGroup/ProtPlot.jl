@@ -37,7 +37,7 @@ function Makie.plot!(ribbon::Ribbon{Tuple{Vector{Protein.Chain}}})
     chains = deepcopy(chains)
     Protein.assign_oxygens!.(chains)
     _assign_secondary_structure!(chains)
-    isnothing(ribbon.colors[]) && (ribbon.colors = [LinRange(0, 1, length(chain)) for chain in chains])
+    isnothing(ribbon.colors[]) && (ribbon.colors = [range(0, 1, length(chain)) for chain in chains])
     #empty!(ribbon.plots)
     render!(ribbon, chains)
 

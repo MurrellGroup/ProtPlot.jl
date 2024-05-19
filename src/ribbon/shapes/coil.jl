@@ -29,7 +29,7 @@ function coil_surface(
         t = normalize(tangents[:, i])
         n = normalize(normals[:, i])
         b = cross(n, t)
-        for (j, angle) in enumerate(LinRange(0, 2π, slice_quality))
+        for (j, angle) in enumerate(range(0, 2π, slice_quality))
             offset = 0.5 * diameter * (cos(angle) * n + sin(angle) * b)
             surface_vertices[:, i, j] = path[:, i] + offset
         end
