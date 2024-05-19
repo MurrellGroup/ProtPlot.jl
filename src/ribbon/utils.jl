@@ -1,17 +1,31 @@
-function expand_colors(colors::AbstractVector, N::Integer)
+function expand_colors(
+    colors::AbstractVector, N::Integer, weights::AbstractVector=ones(length(colors))
+)
     L = length(colors)
-    repeats = ceil(Int, N / L)
-    total_elements = repeats * L
-    extra_elements = total_elements - N
+    weight_sum = sum(weights)
 
-    result = Vector{eltype(colors)}()
+    L != length(weights) && throw(ArgumentError("The lengths of colors and weights must be the same."))
+    any(<(0), weights) && throw(ArgumentError("All weights must be non-negative."))
+    iszero(weight_sum) && throw(ArgumentError("Sum of weights must not be zero."))
+
+    normalized_weights = weights / weight_sum
+
+    result = similar(colors, 0)
     for i in 1:L
-        current_repeats = repeats - (i <= extra_elements ? 1 : 0)
+        current_repeats = floor(Int, N * normalized_weights[i])
         append!(result, fill(colors[i], current_repeats))
     end
 
-    return reshape(result[1:N], :, 1)
+    while length(result) > N
+        pop!(result)
+    end
+    while length(result) < N
+        append!(result, colors[end])
+    end
+
+    return reshape(result, :, 1)
 end
+
 
 # split a chain into subchains if there is a gap in the residue numbering or if the distance between consecutive carbonyl and nitrogen atoms is greater than a certain threshold
 function get_subchain_ranges(chain::Protein.Chain; resnums=true, cn_distance_tolerance=2)

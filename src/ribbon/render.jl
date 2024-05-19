@@ -21,7 +21,7 @@ function render!(ribbon::Ribbon, chain::Protein.Chain, color::AbstractVector{<:R
     for (ss_name, segment_range) in segments(chain)
         surface_vertices, adjusted_range = get_surface_vertices(ribbon, Val(ss_name), segment_range, chain)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
-            color = expand_colors(color[adjusted_range], size(surface_vertices, 2)),
+            color = expand_colors(color[adjusted_range], size(surface_vertices, 2), [0.5; ones(length(adjusted_range)-2); 0.5]),
             colormap = colormap,
             colorrange = (0, 1))
     end
