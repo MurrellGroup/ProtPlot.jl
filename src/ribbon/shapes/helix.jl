@@ -26,9 +26,6 @@ function helix_surface(
             surface_vertices[:, i, j] = path[:, i] .- offset
         end
     end
-    
-    surface_vertices[:, 1, :] .= path[:, 1]
-    surface_vertices[:, end, :] .= path[:, end]
 
     return surface_vertices
 end
