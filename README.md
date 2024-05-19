@@ -46,6 +46,10 @@ ribbon_scene(chains, colors=colors, colormap=:hsv)
 
 ## Attributes
 You may customize the geometry of the ribbon by specifying the value of attributes in the keyword arguments of your call. Here's a list of available attributes and their defaults:
+- `secondary_structures = nothing` (gets assigned by an algorithm by default; needs to be a vector of `Vector{Char}`)
+- `colors = nothing` (gets assigned `range(0, 1, L)` for each chain by default, mapping to `colormap`; overrides colormap if colorants are given)
+- `colormap = :jet` (see the [ColorSchemes.jl catalogue](https://juliagraphics.github.io/ColorSchemes.jl/stable/catalogue/); can also be a vector of colorants)
+
 - `coil_diameter = 0.4`
 - `coil_spline_quality = 20`
 - `coil_slice_quality = 20`
