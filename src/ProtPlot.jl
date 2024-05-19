@@ -2,6 +2,7 @@ module ProtPlot
 
 using Backboner
 using Makie
+using ColorTypes
 
 import Backboner.Protein: readpdb
 
@@ -16,4 +17,3 @@ using .Attention
 export Attention, animate_attention
 
 end
- 
