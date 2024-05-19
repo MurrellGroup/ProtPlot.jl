@@ -32,13 +32,9 @@ function render!(ribbon::Ribbon, chain::Protein.Chain, color::AbstractVector{<:C
     render!(ribbon, chain, range(0, 1, length(color)), color)
 end
 
-function draw_lines_between_subchains!(
-    ribbon::Ribbon, chain::Protein.Chain, subchain_ranges::Vector{UnitRange{Int}},
-    color, linewidth = 2
-)
-    subchains = [chain[r] for r in subchain_ranges]
-    for (i, j) in zip(1:length(subchains)-1, 2:length(subchains))
-        startpoint, endpoint = subchains[i].backbone[end-1], subchains[j].backbone[begin+1]
+function draw_lines_between_subchains!(ribbon::Ribbon, subchains::Vector{Protein.Chain}, color=:lightgray, linewidth=2)
+    for i in 1:length(subchains)-1
+        startpoint, endpoint = subchains[i].backbone[end-1], subchains[i+1].backbone[begin+1]
         n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
         xs, ys, zs = [range(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
         linesegments!(ribbon, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)
@@ -51,10 +47,12 @@ function render!(ribbon::Ribbon, chains::Vector{Protein.Chain})
         length(chain) > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
         length(chain) == length(color) || throw(ArgumentError("Chain and color must have the same length"))
         subchain_ranges = get_subchain_ranges(chain)
-        for r in subchain_ranges
-            render!(ribbon, chain[r], color[r], ribbon.colormap)
+        subchains = [chain[r] for r in subchain_ranges]
+        subcolors = [color[r] for r in subchain_ranges]
+        for (subchain, subcolor) in zip(subchains, subcolors)
+            render!(ribbon, subchain, subcolor, ribbon.colormap)
         end
-        draw_lines_between_subchains!(ribbon, chain, subchain_ranges, :lightgray)
+        draw_lines_between_subchains!(ribbon, subchains)
     end
     return ribbon
 end
