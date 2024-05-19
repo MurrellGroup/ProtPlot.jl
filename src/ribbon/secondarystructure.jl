@@ -62,8 +62,7 @@ function _assign_secondary_structure!(chains::Vector{Protein.Chain})
     return chains
 end
 
-function segments(chain::Protein.Chain)
-    ssvector = chain.ssvector
+function segments(ssvector::Vector{Char})
     ss_names = [SS_NAME_DICT[ss] for ss in ssvector]
     segment_ranges = Tuple{Symbol, UnitRange{Int}}[]
     start_i = 1
@@ -78,3 +77,5 @@ function segments(chain::Protein.Chain)
 
     return segment_ranges
 end
+
+segments(chain::Protein.Chain) = segments(chain.ssvector)
