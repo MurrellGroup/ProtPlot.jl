@@ -8,7 +8,6 @@ using Makie
         secondary_structures = nothing,
         colors = nothing,
         colormap = :jet,
-        backgroundcolor = :black,
 
         coil_diameter = 0.4,
         coil_spline_quality = 20,
