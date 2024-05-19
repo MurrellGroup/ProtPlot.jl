@@ -32,6 +32,20 @@ function render!(
     return ribbon
 end
 
+function render!(
+    ribbon::Ribbon,
+    chain::Protein.Chain,
+    color::AbstractVector{<:Colorant},
+)
+    length(chain) > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
+    for (ss_name, segment_range) in segments(chain)
+        surface_vertices = get_surface_vertices(ribbon, Val(ss_name), segment_range, chain)
+        surface!(ribbon, eachslice(surface_vertices, dims=1)...,
+                 color=expand_colors(color[segment_range], size(surface_vertices, 2)))
+    end
+    return ribbon
+end
+
 function draw_lines_between_subchains!(
     ribbon::Ribbon,
     chain::Protein.Chain,

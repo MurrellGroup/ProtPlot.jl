@@ -16,7 +16,7 @@ ProtPlot exports the Ribbon plot:
 
 ## Examples
 
-A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function. Alternatively, you can pass a single chain, or a PDB file path. 
+A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function. Alternatively, you can pass a single chain, or a PDB file path.
 
 ```julia
 using GLMakie # use the GLMakie backend
@@ -29,7 +29,10 @@ ribbon_scene("test/data/1ASS.pdb", backgroundcolor=:black, colormap=:jet)
 
 ## Customizing colors
 
-Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each vector contains values between 0 and 1, representing the colors of each residue in their respective chains according to the `colormap`.
+Use the `colors` keyword argument to customize colors at the residue level. This argument should be a vector of vectors, where each vector contains either:
+
+- values between 0 and 1, representing the colors of each residue in their respective chains according to the `colormap`.
+- a list of [`Colorant`s](https://github.com/JuliaGraphics/ColorTypes.jl?tab=readme-ov-file#colortypes), one per residue. For example, `RGBA(1, 0, 0, 0.5)` for a 50% transparent red. Load the `ColorTypes` or `Colors` package to create such `Colorant`s.
 
 ```julia
 # Load protein data from a PDB file
