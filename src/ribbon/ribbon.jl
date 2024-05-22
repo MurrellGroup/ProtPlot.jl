@@ -32,14 +32,18 @@ include("render.jl")
 
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{Protein.Chain}}})
-    chains = ribbon[1][]
+    chains = ribbon[1]
 
-    chains = deepcopy(chains)
-    Protein.assign_oxygens!.(chains) # need to force recalculation of oxygens if backbone changes (assign_missing_oxygens! would technically suffice for now since we have no observables detecting changes)
-    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chains))
-    isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, length(chain)) for chain in chains])
-    #empty!(ribbon.plots)
-    render!(ribbon, chains)
+    function update_plot()
+        chains = deepcopy(chains)
+        Protein.assign_oxygens!.(chains) # need to force recalculation of oxygens if backbone changes (assign_missing_oxygens! would technically suffice for now since we have no observables detecting changes)
+        isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chains))
+        isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, length(chain)) for chain in chains])
+        empty!(ribbon.plots)
+        render!(ribbon, chains)
+    end
+
+    update_plot()
 
     return ribbon
 end
@@ -49,7 +53,7 @@ Makie.convert_arguments(::Type{<:Ribbon}, chain::Protein.Chain) = ([chain],)
 Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
 
 Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backbone}) = (Protein.Chain.(backbones),)
-Makie.convert_arguments(T, ::Type{<:Ribbon}, backbone::Backbone) = Makie.convert_arguments(T, [backbone])
+Makie.convert_arguments(T::Type{<:Ribbon}, backbone::Backbone) = Makie.convert_arguments(T, [backbone])
 
 Makie.convert_arguments(T::Type{<:Ribbon}, coords_vec::AbstractVector{<:AbstractMatrix{<:Real}}) = Makie.convert_arguments(T, Backbone.(coords_vec))
 Makie.convert_arguments(T::Type{<:Ribbon}, coords::AbstractMatrix{<:Real}) = Makie.convert_arguments(T, [coords])
