@@ -15,15 +15,15 @@ end
 const MIN_HELIX_LENGTH = 4
 const MIN_STRAND_LENGTH = 2
 
-function clean_secondary_structure!(ssvector::Vector{Char})
-    n = length(ssvector)
+function clean_secondary_structure!(ss_codes::Vector{Char})
+    n = length(ss_codes)
     i = 1
 
     while i <= n
-        current_structure = ssvector[i]
+        current_structure = ss_codes[i]
         segment_start = i
 
-        while i <= n && ssvector[i] == current_structure
+        while i <= n && ss_codes[i] == current_structure
             i += 1
         end
         segment_end = i - 1
@@ -32,43 +32,46 @@ function clean_secondary_structure!(ssvector::Vector{Char})
         for (code, min_len) in [('H', MIN_HELIX_LENGTH), ('E', MIN_STRAND_LENGTH)]
             if current_structure == code && segment_length < min_len
                 for j in segment_start:segment_end
-                    ssvector[j] = '-'
+                    ss_codes[j] = '-'
                 end
             end
         end
     end
 
-    return ssvector
+    return ss_codes
 end
 
 const INT_TO_SS_CODE = ['-', 'H', 'E']
 
 function _assign_secondary_structure(chains::Vector{Protein.Chain})
-    ssvectors_int = ASS.assign_secondary_structure(chains)
-    ssvectors_char = Vector{Char}[]
-    for ssvector_int in ssvectors_int
-        ssvector_char = get.(Ref(INT_TO_SS_CODE), ssvector_int, '-')
-        clean_secondary_structure!(ssvector_char)
-        push!(ssvectors_char, ssvector_char)
+    ss_numbers_by_chain = ASS.assign_secondary_structure(chains)
+    ss_codes_by_chain = Vector{Char}[]
+    for ss_numbers in ss_numbers_by_chain
+        ss_codes = get.(Ref(INT_TO_SS_CODE), ss_numbers, '-')
+        clean_secondary_structure!(ss_codes)
+        push!(ss_codes_by_chain, ss_codes)
     end
-    return ssvectors_char
+    return ss_codes_by_chain
 end
 
 function _assign_secondary_structure!(chains::Vector{Protein.Chain})
-    ssvectors = _assign_secondary_structure(chains)
-    for (chain, ssvector) in zip(chains, ssvectors)
-        chain.ssvector .= ssvector
+    ss_codes_by_chain = _assign_secondary_structure(chains)
+    for (chain, ss_codes) in zip(chains, ss_codes)
+        chain.ssvector .= ss_codes
     end
     return chains
 end
 
-function segments(ssvector::Vector{Char})
-    ss_names = [SS_NAME_DICT[ss] for ss in ssvector]
+function segments(ss_codes::Vector{Char})
+    ss_names = [SS_NAME_DICT[ss] for ss in ss_codes]
     segment_ranges = Tuple{Symbol, UnitRange{Int}}[]
     start_i = 1
 
     for (i, ss_name) in enumerate(ss_names)
         if ss_name != ss_names[start_i]
+            if ss_name != :Coil && ss_names[start_i] != :Coil
+                push!(segment_ranges, (:Coil, i:i-1))
+            end
             push!(segment_ranges, (ss_names[start_i], start_i:i-1))
             start_i = i
         end
