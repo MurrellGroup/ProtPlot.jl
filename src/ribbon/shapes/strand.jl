@@ -90,13 +90,11 @@ function strand_surface(
         half_normal = normal * (thickness / 2)
         arrow_vector = binormal * arrow(t)
         surface_vertices[:, i, 1] = midpoint .+ half_normal .+ arrow_vector
-        surface_vertices[:, i, 2] = midpoint .+ half_normal .- arrow_vector
+        surface_vertices[:, i, 2] = midpoint .- half_normal .+ arrow_vector
         surface_vertices[:, i, 3] = midpoint .- half_normal .- arrow_vector
-        surface_vertices[:, i, 4] = midpoint .- half_normal .+ arrow_vector
+        surface_vertices[:, i, 4] = midpoint .+ half_normal .- arrow_vector
         surface_vertices[:, i, 5] = surface_vertices[:, i, 1]
     end
-
-    surface_vertices[:, 1, :] .= midpoint_path[:, 1]
 
     return surface_vertices
 end

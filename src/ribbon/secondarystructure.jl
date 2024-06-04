@@ -56,7 +56,7 @@ end
 
 function _assign_secondary_structure!(chains::Vector{Protein.Chain})
     ss_codes_by_chain = _assign_secondary_structure(chains)
-    for (chain, ss_codes) in zip(chains, ss_codes)
+    for (chain, ss_codes) in zip(chains, ss_codes_by_chain)
         chain.ssvector .= ss_codes
     end
     return chains
