@@ -16,7 +16,10 @@ ProtPlot exports the Ribbon plot:
 
 ## Examples
 
-A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function. Alternatively, you can pass a single chain, or a PDB file path.
+A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function.
+For convenience, argument conversion methods are defined, so you can also pass:
+- a `3x3xL` array of residue backbone atom coordinates (N, Ca, C).
+- a PDB file path.
 
 ```julia
 using GLMakie # use the GLMakie backend
