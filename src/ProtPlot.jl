@@ -8,7 +8,7 @@ import Backboner.Protein: readpdb
 
 export Backboner, readpdb
 
-include("ribbon/ribbon.jl")
+include("Ribbon/Ribbon.jl")
 include("ramachandran.jl")
 
 # TODO: move attention submodule elsewhere
