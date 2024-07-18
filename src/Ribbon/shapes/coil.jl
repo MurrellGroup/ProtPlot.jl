@@ -14,7 +14,7 @@ function coil_surface(
     normals = zeros(T, 3, n_path_points)
 
     normals[:, 1] = abs(tangents[1, 1]) < 0.9 ? [1, 0, 0] : [0, 1, 0]
-    for i in 2:n_path_points
+    @views for i in 2:n_path_points
         prev_normal = normals[:, i-1]
         t = tangents[:, i]
         projected_normal = prev_normal - dot(t, prev_normal) * t
@@ -25,7 +25,7 @@ function coil_surface(
     end
 
     surface_vertices = zeros(T, 3, n_path_points, slice_quality)
-    for i in 1:n_path_points
+    @views for i in 1:n_path_points
         t = normalize(tangents[:, i])
         n = normalize(normals[:, i])
         b = cross(n, t)
@@ -37,8 +37,8 @@ function coil_surface(
     return surface_vertices
 end
 
-function get_surface_segment(ribbon::Ribbon, ::Val{:Coil}, segment_range::UnitRange{Int}, chain::Protein.Chain)
-    adjusted_range = max(1, segment_range.start - 1):min(length(chain), segment_range.stop + 1)
-    points = Protein.alphacarbon_coords(chain)
-    return coil_surface(ribbon.attributes, points; segment_range=adjusted_range), adjusted_range
+function get_surface_segment(ribbon::Ribbon, ::Val{COIL}, segment_range::UnitRange{Int}, chain_backbone::AbstractArray{T,3}) where T<:Real
+    adjusted_range = max(1, segment_range.start - 1):min(size(chain_backbone, 3), segment_range.stop + 1)
+    all_ca_coords = @views chain_backbone[:, 2, :]
+    return coil_surface(ribbon.attributes, all_ca_coords; segment_range=adjusted_range), adjusted_range
 end

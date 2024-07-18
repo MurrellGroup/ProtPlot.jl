@@ -27,27 +27,54 @@ using Makie
 end
 
 include("utils.jl")
-include("secondarystructure.jl")
+include("secondary.jl")
 include("render.jl")
 
 # TODO: observe chains and re-render when they change
-function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{Protein.Chain}}})
-    chains = ribbon[1][]
-    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chains))
-    isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, length(chain)) for chain in chains])
-    render!(ribbon, chains)
+function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3}}}}) where T<:Real
+    chain_backbones = convert.(Array{T,3}, collect(ribbon[1][]))
+    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chain_backbones))
+    isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, size(chain_backbone, 3)) for chain_backbone in chain_backbones])
+    render!(ribbon, chain_backbones)
     return ribbon
 end
 
-Makie.convert_arguments(::Type{<:Ribbon}, chain::Protein.Chain) = ([chain],)
+Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
 
-Makie.convert_arguments(::Type{<:Ribbon}, pdbfile::AbstractString) = (readpdb(pdbfile),)
+Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backbone}) = (map(backbone -> reshape(backbone.coords, 3, 3, :), backbones),)
+Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:Protein.Chain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
+Makie.convert_arguments(R::Type{<:Ribbon}, x::Union{Backbone, Protein.Chain}) = Makie.convert_arguments(R, [x])
 
-Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backbone}) = (Protein.Chain.(backbones),)
-Makie.convert_arguments(T::Type{<:Ribbon}, backbone::Backbone) = Makie.convert_arguments(T, [backbone])
+# TODO: detect format
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, readpdb(path))
 
-Makie.convert_arguments(T::Type{<:Ribbon}, coords_vec::AbstractVector{<:AbstractMatrix{<:Real}}) = Makie.convert_arguments(T, Backbone.(coords_vec))
-Makie.convert_arguments(T::Type{<:Ribbon}, coords::AbstractMatrix{<:Real}) = Makie.convert_arguments(T, [coords])
+#=
+mutable struct PDBEntry
+    id::String
+    tempdir::String
+    path::String
+
+    function PDBEntry(id; tempdir) # TODO: format argument
+        BioStructures.downloadpdb(id, tempdir, format=BioStructures.PDBFormat)
+        path = joinpath(tempdir, id*".pdb")
+        pdbentry = new(id, path)
+        finalizer(pdbentry) do pdbentry
+            rm(path)
+        end
+        return pdbentry
+    end
+end
+
+
+# finalizer: 
+
+function Makie.convert_arguments(T::Type{<:Ribbon}, pdb_entry::PDBEntry)
+    # TODO: use tempdir and delete after reading
+    BioStructures.downloadpdb(pdb_entry.id)
+    chains = readpdb(path)
+    Makie.convert_arguments(T, chains)
+end
+=#
 
 """
     ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
@@ -59,8 +86,6 @@ function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs..
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
     ribbon!(scene, args...; kwargs...)
-    if isempty(camcontrols)
-        center!(scene)
-    end
+    isempty(camcontrols) && center!(scene)
     return scene
 end

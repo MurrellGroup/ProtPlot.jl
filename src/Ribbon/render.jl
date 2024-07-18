@@ -1,8 +1,8 @@
 include("shapes/shapes.jl")
 
-function render!(ribbon::Ribbon, chain::Protein.Chain, secondary::Vector{Char}, color::AbstractVector{<:Real}, colormap)
-    for (ss_name, segment_range) in segments(secondary)
-        surface_vertices, adjusted_range = get_surface_segment(ribbon, Val(ss_name), segment_range, chain)
+function render!(ribbon::Ribbon, chain_backbone::Array{T,3}, secondary_structure::Vector{Int}, color::AbstractVector{<:Real}, colormap) where T<:Real
+    for (ss, segment_range) in segments(secondary_structure)
+        surface_vertices, adjusted_range = get_surface_segment(ribbon, Val(ss), segment_range, chain_backbone)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
             color = expand_colors(
                 color[adjusted_range],
@@ -14,13 +14,13 @@ function render!(ribbon::Ribbon, chain::Protein.Chain, secondary::Vector{Char}, 
     return nothing
 end
 
-function render!(ribbon::Ribbon, chain::Protein.Chain, secondary::Vector{Char}, color::AbstractVector{<:Colorant}, colormap)
-    render!(ribbon, chain, secondary, range(0, 1, length(color)), color)
+function render!(ribbon::Ribbon, chain_backbone::Array{T,3}, secondary_structure::Vector{Int}, color::AbstractVector{<:Colorant}, colormap) where T<:Real
+    render!(ribbon, chain_backbone, secondary_structure, range(0, 1, length(color)), color)
 end
 
-function render_lines_between_subchains!(ribbon::Ribbon, subchains::Vector{Protein.Chain}, color=:lightgray, linewidth=2)
-    for i in 1:length(subchains)-1
-        startpoint, endpoint = subchains[i].backbone[end-1], subchains[i+1].backbone[begin+1]
+function render_lines_between_subchains!(ribbon::Ribbon, chain_backbone_partitions::Vector{Array{T,3}}, color=:lightgray, linewidth=2) where T<:Real
+    for i in 1:length(chain_backbone_partitions)-1
+        startpoint, endpoint = @views chain_backbone_partitions[i][:, 2, end], chain_backbones_partitions[i+1][:, 2, 1]
         n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
         xs, ys, zs = [range(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
         linesegments!(ribbon, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)
@@ -28,23 +28,24 @@ function render_lines_between_subchains!(ribbon::Ribbon, subchains::Vector{Prote
     return nothing
 end
 
-function render!(ribbon::Ribbon, chains::AbstractVector{Protein.Chain})
+function render!(ribbon::Ribbon, chain_backbones::Vector{Array{T,3}}) where T<:Real
     secondary_structures = ribbon.secondary_structures[]
     colors = ribbon.colors[]
-    length(chains) == length(colors) || throw(ArgumentError("Chains and colors must have the same length"))
-    for (chain, secondary, color) in zip(chains, secondary_structures, colors)
-        length(chain) > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
-        length(chain) == length(secondary) || throw(ArgumentError("Chain and secondary structure must have the same length"))
-        length(chain) == length(color) || throw(ArgumentError("Chain and color must have the same length"))
+    length(chain_backbones) == length(colors) || throw(ArgumentError("Chains and colors must have the same length"))
+    for (chain_backbone, secondary_structure, color) in zip(chain_backbones, secondary_structures, colors)
+        chain_length = size(chain_backbone, 3)
+        chain_length > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
+        chain_length == length(secondary_structure) || throw(ArgumentError("coordinates and secondary structure size must match"))
+        chain_length == length(color) || throw(ArgumentError("Chain and color must have the same length"))
 
-        subchain_ranges = get_subchain_ranges(chain)
-        subchains = [chain[r] for r in subchain_ranges]
-        subsecondary = [secondary[r] for r in subchain_ranges]
-        subcolors = [color[r] for r in subchain_ranges]
-        for (subchain, subsecondary, subcolor) in zip(subchains, subsecondary, subcolors)
-            render!(ribbon, subchain, subsecondary, subcolor, ribbon.colormap)
+        partition_ranges = get_subchain_ranges(chain_backbone)
+        chain_backbone_partitions = [chain_backbone[:, :, r] for r in partition_ranges]
+        secondary_structure_partitions = [secondary_structure[r] for r in partition_ranges]
+        color_partitions = [color[r] for r in partition_ranges]
+        for (chain_backbone, secondary_structure, color) in zip(chain_backbone_partitions, secondary_structure_partitions, color_partitions)
+            render!(ribbon, chain_backbone, secondary_structure, color, ribbon.colormap)
         end
-        render_lines_between_subchains!(ribbon, subchains)
+        render_lines_between_subchains!(ribbon, chain_backbone_partitions)
     end
     return nothing
 end

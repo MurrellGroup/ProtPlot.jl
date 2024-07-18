@@ -28,7 +28,7 @@ function strand_midpoints(ca_points::AbstractMatrix{T}) where T <: Real
     return midpoints
 end
 
-function correct_alternating_normals!(normals::AbstractMatrix{T}) where T <: Real
+function alternating_normal_correction!(normals::AbstractMatrix{T}) where T <: Real
     for (i, normal) in enumerate(eachcol(normals))
         if i % 2 == 0
             normal .= -normal
@@ -56,7 +56,7 @@ function strand_surface(
     binormaloids = o_points - ca_points
 
     normals = stack(normalize.(cross.(eachcol(unnormalized_tangents), eachcol(binormaloids))))
-    correct_alternating_normals!(normals)
+    alternating_normal_correction!(normals)
 
     binormals = stack(normalize.(cross.(eachcol(unnormalized_tangents), eachcol(normals))))
 
@@ -99,8 +99,8 @@ function strand_surface(
     return surface_vertices
 end
 
-function get_surface_segment(ribbon::Ribbon, ::Val{:Strand}, segment_range::UnitRange{Int}, chain::Protein.Chain)
-    ca_points = Protein.alphacarbon_coords(chain)
-    o_points = Protein.oxygen_coords(chain) .|> eltype(ca_points)
+function get_surface_segment(ribbon::Ribbon, ::Val{STRAND}, segment_range::UnitRange{Int}, chain_backbone::Array{T,3}) where T<:Real
+    ca_points = @views chain_backbone[:, 2, :]
+    o_points = ASS.get_oxygen_positions(chain_backbone)
     return strand_surface(ribbon.attributes, ca_points, o_points; segment_range), segment_range
 end

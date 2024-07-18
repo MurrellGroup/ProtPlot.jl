@@ -16,8 +16,8 @@ function helix_surface(
     path = spline(all_ca_points; N=n_path_points, r=segment_range)
 
     surface_vertices = zeros(T, 3, n_path_points, slice_quality)
-    for i in 1:n_path_points
-        three_path_points = eachcol(@view(path[:, min(max(begin,i-1),end-2):min(max(begin,i-1)+2,end)])) # understandable expressions are for the weak
+    @views for i in 1:n_path_points
+        three_path_points = eachcol(path[:, min(max(begin,i-1),end-2):min(max(begin,i-1)+2,end)]) # understandable expressions are for the weak
         t = normalize(path_tangent(three_path_points...))
         n = normalize(cross(t, cross(curved_path_normal(three_path_points...), t)))
         b = cross(n, t)
@@ -30,7 +30,7 @@ function helix_surface(
     return surface_vertices
 end
 
-function get_surface_segment(ribbon::Ribbon, ::Val{:Helix}, segment_range::UnitRange{Int}, chain::Protein.Chain)
-    points = Protein.alphacarbon_coords(chain)
+function get_surface_segment(ribbon::Ribbon, ::Val{HELIX}, segment_range::UnitRange{Int}, chain_backbone::Array{<:Real,3})
+    points = @views chain_backbone[:, 2, :]
     return helix_surface(ribbon.attributes, points; segment_range), segment_range
 end
