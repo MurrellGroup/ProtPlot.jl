@@ -13,7 +13,7 @@ function Makie.plot!(ramachandran::Ramachandran{<:Tuple{<:AbstractVector{<:Real}
     return ramachandran
 end
 
-function Makie.convert_arguments(::Type{<:Ramachandran}, chain::Protein.Chain)
+function Makie.convert_arguments(::Type{<:Ramachandran}, chain::Backboner.Protein.Chain)
     bonds = ChainedBonds(chain.backbone)
     valid_residues = [false; chain.resnums[1:end-2] .+ 1 .== chain.resnums[2:end-1] .&& chain.resnums[2:end-1] .+ 1 .== chain.resnums[3:end]; false]
     phi_angles = Protein.phi_angles(bonds)[valid_residues[1:end-1]]
@@ -22,7 +22,7 @@ function Makie.convert_arguments(::Type{<:Ramachandran}, chain::Protein.Chain)
     return (phi_angles, psi_angles)
 end
 
-function Makie.convert_arguments(::Type{<:Ramachandran}, chains::Vector{Protein.Chain})
+function Makie.convert_arguments(::Type{<:Ramachandran}, chains::Vector{Backboner.Protein.Chain})
     phi_angles = Real[]
     psi_angles = Real[]
     for chain in chains
@@ -33,4 +33,4 @@ function Makie.convert_arguments(::Type{<:Ramachandran}, chains::Vector{Protein.
     return (phi_angles, psi_angles)
 end
 
-Makie.convert_arguments(T::Type{<:Ramachandran}, pdbfile::AbstractString) = Makie.convert_arguments(T, readpdb(pdbfile))
+Makie.convert_arguments(T::Type{<:Ramachandran}, pdbfile::AbstractString) = Makie.convert_arguments(T, Backboner.Protein.readchains(pdbfile))
