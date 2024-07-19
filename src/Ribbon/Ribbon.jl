@@ -1,6 +1,5 @@
 export Ribbon, ribbon, ribbon!, ribbon_scene
 
-using Backboner
 using Makie
 
 @recipe(Ribbon, chains) do scene
@@ -41,12 +40,28 @@ end
 
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
 
-Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backbone}) = (map(backbone -> reshape(backbone.coords, 3, 3, :), backbones),)
-Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:Protein.Chain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
-Makie.convert_arguments(R::Type{<:Ribbon}, x::Union{Backbone, Protein.Chain}) = Makie.convert_arguments(R, [x])
+import Backboner
 
-# TODO: detect format
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, readpdb(path))
+Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backboner.Backbone}) = (map(backbone -> reshape(backbone.coords, 3, 3, :), backbones),)
+Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:Backboner.Protein.Chain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
+Makie.convert_arguments(R::Type{<:Ribbon}, x::Union{Backboner.Backbone, Backboner.Protein.Chain}) = Makie.convert_arguments(R, [x])
+
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, format) = Makie.convert_arguments(R, Backboner.readchains(path, format))
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, Backboner.readchains(path))
+
+"""
+    ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+
+Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
+unless the user supplies `camcontrols` (see Makie's camera documentation for details).
+"""
+function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
+    scene = Scene(backgroundcolor=backgroundcolor)
+    cam3d!(scene; camcontrols...)
+    ribbon!(scene, args...; kwargs...)
+    isempty(camcontrols) && center!(scene)
+    return scene
+end
 
 #=
 mutable struct PDBEntry
@@ -65,7 +80,6 @@ mutable struct PDBEntry
     end
 end
 
-
 # finalizer: 
 
 function Makie.convert_arguments(T::Type{<:Ribbon}, pdb_entry::PDBEntry)
@@ -75,17 +89,3 @@ function Makie.convert_arguments(T::Type{<:Ribbon}, pdb_entry::PDBEntry)
     Makie.convert_arguments(T, chains)
 end
 =#
-
-"""
-    ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
-
-Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
-unless the user supplies `camcontrols` (see Makie's camera documentation for details).
-"""
-function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
-    scene = Scene(backgroundcolor=backgroundcolor)
-    cam3d!(scene; camcontrols...)
-    ribbon!(scene, args...; kwargs...)
-    isempty(camcontrols) && center!(scene)
-    return scene
-end
