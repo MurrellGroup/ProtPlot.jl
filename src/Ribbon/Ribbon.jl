@@ -46,8 +46,8 @@ Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backboner.
 Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:Backboner.Protein.Chain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
 Makie.convert_arguments(R::Type{<:Ribbon}, x::Union{Backboner.Backbone, Backboner.Protein.Chain}) = Makie.convert_arguments(R, [x])
 
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, format) = Makie.convert_arguments(R, Backboner.readchains(path, format))
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, Backboner.readchains(path))
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, format) = Makie.convert_arguments(R, Backboner.Protein.readchains(path, format))
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, Backboner.Protein.readchains(path))
 
 """
     ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
@@ -62,30 +62,3 @@ function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs..
     isempty(camcontrols) && center!(scene)
     return scene
 end
-
-#=
-mutable struct PDBEntry
-    id::String
-    tempdir::String
-    path::String
-
-    function PDBEntry(id; tempdir) # TODO: format argument
-        BioStructures.downloadpdb(id, tempdir, format=BioStructures.PDBFormat)
-        path = joinpath(tempdir, id*".pdb")
-        pdbentry = new(id, path)
-        finalizer(pdbentry) do pdbentry
-            rm(path)
-        end
-        return pdbentry
-    end
-end
-
-# finalizer: 
-
-function Makie.convert_arguments(T::Type{<:Ribbon}, pdb_entry::PDBEntry)
-    # TODO: use tempdir and delete after reading
-    BioStructures.downloadpdb(pdb_entry.id)
-    chains = readpdb(path)
-    Makie.convert_arguments(T, chains)
-end
-=#
