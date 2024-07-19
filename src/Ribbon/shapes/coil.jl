@@ -1,7 +1,7 @@
 function coil_surface(
     attributes::Attributes,
-    all_ca_points::AbstractMatrix{T};
     segment_range::UnitRange{Int},
+    all_ca_points::AbstractMatrix{T},
 ) where T <: Real
     diameter = attributes.coil_diameter[]
     spline_quality = attributes.coil_spline_quality[]
@@ -40,5 +40,5 @@ end
 function get_surface_segment(ribbon::Ribbon, ::Val{COIL}, segment_range::UnitRange{Int}, chain_backbone::AbstractArray{T,3}) where T<:Real
     adjusted_range = max(1, segment_range.start - 1):min(size(chain_backbone, 3), segment_range.stop + 1)
     all_ca_coords = @views chain_backbone[:, 2, :]
-    return coil_surface(ribbon.attributes, all_ca_coords; segment_range=adjusted_range), adjusted_range
+    return coil_surface(ribbon.attributes, adjusted_range, all_ca_coords), adjusted_range
 end

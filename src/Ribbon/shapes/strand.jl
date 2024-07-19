@@ -39,9 +39,9 @@ end
 
 function strand_surface(
     attributes::Attributes,
-    all_ca_points::AbstractMatrix{T},
-    all_o_points::AbstractMatrix{T};
     segment_range::UnitRange{Int},
+    all_ca_points::AbstractMatrix{T},
+    all_o_points::AbstractMatrix{T},
 ) where T <: Real
     width = attributes.strand_width[]
     thickness = attributes.strand_thickness[]
@@ -100,7 +100,7 @@ function strand_surface(
 end
 
 function get_surface_segment(ribbon::Ribbon, ::Val{STRAND}, segment_range::UnitRange{Int}, chain_backbone::Array{T,3}) where T<:Real
-    ca_points = @views chain_backbone[:, 2, :]
-    o_points = ASS.get_oxygen_positions(chain_backbone)
-    return strand_surface(ribbon.attributes, ca_points, o_points; segment_range), segment_range
+    all_ca_points = @views chain_backbone[:, 2, :]
+    all_o_points = ASS.get_oxygen_positions(chain_backbone)
+    return strand_surface(ribbon.attributes, segment_range, all_ca_points, all_o_points), segment_range
 end

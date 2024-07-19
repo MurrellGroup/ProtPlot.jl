@@ -4,8 +4,8 @@ curved_path_normal(p1, p2, p3) = -normalize!(p1 - p2 + p3 - p2)
 # does weird twist when second derivative changes too quickly
 function helix_surface(
     attributes::Attributes,
-    all_ca_points::AbstractMatrix{T};
     segment_range::UnitRange{Int},
+    all_ca_points::AbstractMatrix{T},
 ) where T <: Real
     width = attributes.helix_width[]
     thickness = attributes.helix_thickness[]
@@ -31,6 +31,6 @@ function helix_surface(
 end
 
 function get_surface_segment(ribbon::Ribbon, ::Val{HELIX}, segment_range::UnitRange{Int}, chain_backbone::Array{<:Real,3})
-    points = @views chain_backbone[:, 2, :]
-    return helix_surface(ribbon.attributes, points; segment_range), segment_range
+    all_ca_points = @views chain_backbone[:, 2, :]
+    return helix_surface(ribbon.attributes, segment_range, all_ca_points), segment_range
 end
