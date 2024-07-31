@@ -1,7 +1,3 @@
-export Ribbon, ribbon, ribbon!, ribbon_scene
-
-using Makie
-
 @recipe(Ribbon, chains) do scene
     Attributes(
         secondary_structures = nothing,
@@ -32,6 +28,7 @@ include("render.jl")
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3}}}}) where T<:Real
     chain_backbones = convert.(Array{T,3}, collect(ribbon[1][]))
+    filter!(c -> size(c, 3) > 1, chain_backbones)
     isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chain_backbones))
     isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, size(chain_backbone, 3)) for chain_backbone in chain_backbones])
     render!(ribbon, chain_backbones)

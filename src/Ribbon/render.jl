@@ -20,7 +20,7 @@ end
 
 function render_lines_between_subchains!(ribbon::Ribbon, chain_backbone_partitions::Vector{Array{T,3}}, color=:lightgray, linewidth=2) where T<:Real
     for i in 1:length(chain_backbone_partitions)-1
-        startpoint, endpoint = @views chain_backbone_partitions[i][:, 2, end], chain_backbones_partitions[i+1][:, 2, 1]
+        startpoint, endpoint = @views chain_backbone_partitions[i][:, 2, end], chain_backbone_partitions[i+1][:, 2, 1]
         n_segments = trunc(Int, norm(endpoint - startpoint) / 0.8)
         xs, ys, zs = [range(startpoint[i], endpoint[i], 2*n_segments) for i in 1:3]
         linesegments!(ribbon, xs, ys, zs; linewidth=linewidth, color=color, transparency=true)

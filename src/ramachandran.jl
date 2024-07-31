@@ -1,5 +1,3 @@
-export Ramachandran, ramachandran, ramachandran!
-
 @recipe(Ramachandran, phi_angles, psi_angles) do scene
     Attributes(
         color = :black,
