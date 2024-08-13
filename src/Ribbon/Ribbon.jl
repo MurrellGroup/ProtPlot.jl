@@ -1,6 +1,5 @@
 @recipe(Ribbon, chains) do scene
     Attributes(
-        keepers = nothing,
         secondary_structures = nothing,
         colors = nothing,
         colormap = :jet,
