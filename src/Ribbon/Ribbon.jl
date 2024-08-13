@@ -1,5 +1,6 @@
 @recipe(Ribbon, chains) do scene
     Attributes(
+        keepers = nothing,
         secondary_structures = nothing,
         colors = nothing,
         colormap = :jet,
@@ -28,14 +29,14 @@ include("render.jl")
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3}}}}) where T<:Real
     chain_backbones = convert.(Array{T,3}, collect(ribbon[1][]))
-    filter!(c -> size(c, 3) > 1, chain_backbones)
     isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chain_backbones))
-    isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, 1, size(chain_backbone, 3)) for chain_backbone in chain_backbones])
+    isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, !isone(L), L) for L in size.(chain_backbones, 3)])
     render!(ribbon, chain_backbones)
     return ribbon
 end
 
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
+Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Float64,3}(undef, 3, 3, 0))
 
 import Backboner
 

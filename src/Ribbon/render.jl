@@ -31,10 +31,11 @@ end
 function render!(ribbon::Ribbon, chain_backbones::Vector{Array{T,3}}) where T<:Real
     secondary_structures = ribbon.secondary_structures[]
     colors = ribbon.colors[]
-    length(chain_backbones) == length(colors) || throw(ArgumentError("Chains and colors must have the same length"))
-    for (chain_backbone, secondary_structure, color) in zip(chain_backbones, secondary_structures, colors)
+    length(chain_backbones) == length(secondary_structures) || throw(ArgumentError("Chains and secondary structures vector must have the same length"))
+    length(chain_backbones) == length(colors) || throw(ArgumentError("Chains and colors vector must have the same length"))
+    keepers = findall(c -> size(c, 3) > 1, chain_backbones)
+    for (chain_backbone, secondary_structure, color) in zip(chain_backbones[keepers], secondary_structures[keepers], colors[keepers])
         chain_length = size(chain_backbone, 3)
-        chain_length > 1 || throw(ArgumentError("Chain must have at least 2 residues"))
         chain_length == length(secondary_structure) || throw(ArgumentError("coordinates and secondary structure size must match"))
         chain_length == length(color) || throw(ArgumentError("Chain and color must have the same length"))
 
