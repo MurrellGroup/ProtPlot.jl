@@ -14,7 +14,7 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 
 [compat]
 AssigningSecondaryStructure = "^0.4.2"
-Backboner = "0.11"
+Backboner = "0.11, 0.12"
 BioStructures = "4"
 ColorTypes = "0.8, 0.9, 0.10, 0.11"
 Dierckx = "0.5"
