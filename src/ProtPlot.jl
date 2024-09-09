@@ -10,7 +10,7 @@ export readchains, pdbentry, @pdb_str
 using Makie
 using ColorTypes
 
-import ProteinChains: ProteinChain, readchains, pdbentry, @pdb_str
+import ProteinChains: ProteinStructure, ProteinChain, readchains, pdbentry, @pdb_str
 import Backboner: Backbone, get_torsion_angles
 
 include("Ribbon/Ribbon.jl")
