@@ -11,16 +11,16 @@ function Makie.plot!(ramachandran::Ramachandran{<:Tuple{<:AbstractVector{<:Real}
     return ramachandran
 end
 
-function Makie.convert_arguments(::Type{<:Ramachandran}, chain::Backboner.Protein.Chain)
-    bonds = ChainedBonds(chain.backbone)
-    valid_residues = [false; chain.resnums[1:end-2] .+ 1 .== chain.resnums[2:end-1] .&& chain.resnums[2:end-1] .+ 1 .== chain.resnums[3:end]; false]
-    phi_angles = Protein.phi_angles(bonds)[valid_residues[1:end-1]]
-    psi_angles = Protein.psi_angles(bonds)[valid_residues[2:end]]
+function Makie.convert_arguments(::Type{<:Ramachandran}, chain::ProteinChain)
+    valid_residues = [false; chain.numbering[1:end-2] .+ 1 .== chain.numbering[2:end-1] .== chain.numbering[3:end] .- 1; false]
+    torsion_angles = get_torsion_angles(Backbone(chain.backbone))
+    phi_angles = torsion_angles[3:3:end][valid_residues[1:end-1]]
+    psi_angles = torsion_angles[1:3:end][valid_residues[2:end]]
     count(!, valid_residues) > 2 && @warn "Discarding $(count(!, valid_residues) - 2) out of $(length(valid_residues)) residues in Ramachandran plot due to missing residues."
     return (phi_angles, psi_angles)
 end
 
-function Makie.convert_arguments(::Type{<:Ramachandran}, chains::Vector{Backboner.Protein.Chain})
+function Makie.convert_arguments(::Type{<:Ramachandran}, chains::AbstractVector{<:ProteinChain})
     phi_angles = Real[]
     psi_angles = Real[]
     for chain in chains
@@ -31,4 +31,4 @@ function Makie.convert_arguments(::Type{<:Ramachandran}, chains::Vector{Backbone
     return (phi_angles, psi_angles)
 end
 
-Makie.convert_arguments(T::Type{<:Ramachandran}, pdbfile::AbstractString) = Makie.convert_arguments(T, Backboner.Protein.readchains(pdbfile))
+Makie.convert_arguments(T::Type{<:Ramachandran}, path::AbstractString) = Makie.convert_arguments(T, readchains(path))

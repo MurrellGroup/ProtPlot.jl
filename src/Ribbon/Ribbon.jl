@@ -37,14 +37,10 @@ end
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
 Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Float64,3}(undef, 3, 3, 0))
 
-import Backboner
+Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
+Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
 
-Makie.convert_arguments(::Type{<:Ribbon}, backbones::AbstractVector{<:Backboner.Backbone}) = (map(backbone -> reshape(backbone.coords, 3, 3, :), backbones),)
-Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:Backboner.Protein.Chain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
-Makie.convert_arguments(R::Type{<:Ribbon}, x::Union{Backboner.Backbone, Backboner.Protein.Chain}) = Makie.convert_arguments(R, [x])
-
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, format) = Makie.convert_arguments(R, Backboner.Protein.readchains(path, format))
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString) = Makie.convert_arguments(R, Backboner.Protein.readchains(path))
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, args...) = Makie.convert_arguments(R, readchains(path, args...))
 
 """
     ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)

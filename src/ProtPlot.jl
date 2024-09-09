@@ -5,23 +5,15 @@ export ribbon_scene
 
 export Ramachandran, ramachandran, ramachandran!
 
-export PDBEntry
+export readchains, pdbentry, @pdb_str
 
 using Makie
 using ColorTypes
 
-import Backboner
-import Backboner.Protein: readpdb
-export Backboner, readpdb
-
-import BioStructures
+import ProteinChains: ProteinChain, readchains, pdbentry, @pdb_str
+import Backboner: Backbone, get_torsion_angles
 
 include("Ribbon/Ribbon.jl")
 include("ramachandran.jl")
-
-PDBEntry(pdbid::AbstractString; format=BioStructures.PDBFormat, kwargs...) = mktempdir() do dir
-    path = BioStructures.downloadpdb(pdbid; dir, format, kwargs...)
-    Backboner.Protein.readchains(path, format)
-end
 
 end
