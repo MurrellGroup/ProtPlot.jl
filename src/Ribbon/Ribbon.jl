@@ -37,16 +37,22 @@ end
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
 Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Float64,3}(undef, 3, 3, 0))
 
-Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
-Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
+Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:AbstractProteinChain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
+Makie.convert_arguments(R::Type{<:Ribbon}, chain::AbstractProteinChain) = Makie.convert_arguments(R, [chain])
 
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, args...) = Makie.convert_arguments(R, readchains(path, args...))
+Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, args...) = Makie.convert_arguments(R, read(path, ProteinStructure, args...))
 
 """
-    ribbon_scene(chains::AbstractVector{Protein.Chain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+    ribbon_scene(chains::AbstractVector{<:ProteinChains.AbstractProteinChain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
 Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
+
+## Example
+
+```jldoctest
+julia> ribbon_scene(pdb"1OVE")
+```
 """
 function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)

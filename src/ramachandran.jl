@@ -31,4 +31,4 @@ function Makie.convert_arguments(::Type{<:Ramachandran}, chains::AbstractVector{
     return (phi_angles, psi_angles)
 end
 
-Makie.convert_arguments(T::Type{<:Ramachandran}, path::AbstractString) = Makie.convert_arguments(T, readchains(path))
+Makie.convert_arguments(T::Type{<:Ramachandran}, path::AbstractString) = Makie.convert_arguments(T, read(path, ProteinStructure))

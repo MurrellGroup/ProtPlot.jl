@@ -5,13 +5,13 @@ export ribbon_scene
 
 export Ramachandran, ramachandran, ramachandran!
 
-export readchains, pdbentry, @pdb_str
+export pdbentry, @pdb_str
 
 using Makie
 using ColorTypes
 
-import ProteinChains: ProteinStructure, ProteinChain, readchains, pdbentry, @pdb_str
-import Backboner: Backbone, get_torsion_angles
+using ProteinChains
+using Backboner: Backbone, get_torsion_angles
 
 include("Ribbon/Ribbon.jl")
 include("ramachandran.jl")
