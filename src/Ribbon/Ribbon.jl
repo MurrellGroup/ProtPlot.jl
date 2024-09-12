@@ -28,7 +28,7 @@ include("render.jl")
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3}}}}) where T<:Real
     chain_backbones = convert.(Array{T,3}, collect(ribbon[1][]))
-    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = _assign_secondary_structure(chain_backbones))
+    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = assign_secondary_structure(chain_backbones))
     isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, !isone(L), L) for L in size.(chain_backbones, 3)])
     render!(ribbon, chain_backbones)
     return ribbon

@@ -1,7 +1,8 @@
 include("shapes/shapes.jl")
 
 function render!(ribbon::Ribbon, chain_backbone::Array{T,3}, secondary_structure::Vector{Int}, color::AbstractVector{<:Real}, colormap) where T<:Real
-    for (ss, segment_range) in segments(secondary_structure)
+    for (ss, segment_range) in segments(clean_secondary_structure!(secondary_structure))
+        display((ss, segment_range))
         surface_vertices, adjusted_range = get_surface_segment(ribbon, Val(ss), segment_range, chain_backbone)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
             color = expand_colors(
@@ -39,7 +40,7 @@ function render!(ribbon::Ribbon, chain_backbones::Vector{Array{T,3}}) where T<:R
         chain_length == length(secondary_structure) || throw(ArgumentError("coordinates and secondary structure size must match"))
         chain_length == length(color) || throw(ArgumentError("Chain and color must have the same length"))
 
-        partition_ranges = get_subchain_ranges(chain_backbone)
+        partition_ranges = filter(r -> length(r) > 1, get_subchain_ranges(chain_backbone))
         chain_backbone_partitions = [chain_backbone[:, :, r] for r in partition_ranges]
         secondary_structure_partitions = [secondary_structure[r] for r in partition_ranges]
         color_partitions = [color[r] for r in partition_ranges]

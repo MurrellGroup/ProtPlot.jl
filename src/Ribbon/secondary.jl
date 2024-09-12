@@ -30,12 +30,6 @@ function clean_secondary_structure!(secondary_structure::Vector{Int})
     return secondary_structure
 end
 
-function _assign_secondary_structure(chain_backbones::Vector{Array{T,3}}) where T<:Real
-    secondary_structure_by_chain = ASS.assign_secondary_structure(chain_backbones)
-    clean_secondary_structure!.(secondary_structure_by_chain)
-    return secondary_structure_by_chain
-end
-
 function segments(secondary_structure::Vector{Int})
     segment_ranges = Tuple{Int,UnitRange{Int}}[]
     start_i = 1
