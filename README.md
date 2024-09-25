@@ -16,10 +16,10 @@ ProtPlot exports the Ribbon plot:
 
 ## Examples
 
-A ribbon plot is constructed from a `Vector{Backboner.Protein.Chain}`, which you can obtain from a PDB file using the exported `readpdb` function.
-For convenience, argument conversion methods are defined, so you can also pass:
+Ribbon plots are constructed from vectors of protein backbones represented as `3x3xL` arrays.
+For convenience, argument conversion methods are defined, and the ribbon constructors can take:
 - a `3x3xL` array of residue backbone atom coordinates (N, Ca, C), or a vector of these for each chain.
-- a `PDBEntry(pdb_id)`, which will download a temporary file, read it, delete it, and return a vector of chains.
+- a `BioStructures.MolecularStructure` or `BioStructures.Chain`.
 - a PDB file path.
 
 ```julia
