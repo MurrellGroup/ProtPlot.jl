@@ -2,7 +2,6 @@ include("shapes/shapes.jl")
 
 function render!(ribbon::Ribbon, chain_backbone::Array{T,3}, secondary_structure::Vector{Int}, color::AbstractVector{<:Real}, colormap) where T<:Real
     for (ss, segment_range) in segments(clean_secondary_structure!(secondary_structure))
-        display((ss, segment_range))
         surface_vertices, adjusted_range = get_surface_segment(ribbon, Val(ss), segment_range, chain_backbone)
         surface!(ribbon, eachslice(surface_vertices, dims=1)...,
             color = expand_colors(
