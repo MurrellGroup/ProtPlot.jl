@@ -28,7 +28,7 @@ include("render.jl")
 # TODO: observe chains and re-render when they change
 function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3}}}}) where T<:Real
     chain_backbones = convert.(Array{T,3}, collect(ribbon[1][]))
-    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = assign_secondary_structure(chain_backbones))
+    isnothing(ribbon.secondary_structures[]) && (ribbon.secondary_structures[] = ASS.assign_secondary_structure(chain_backbones))
     isnothing(ribbon.colors[]) && (ribbon.colors[] = [range(0, !isone(L), L) for L in size.(chain_backbones, 3)])
     render!(ribbon, chain_backbones)
     return ribbon
@@ -37,13 +37,13 @@ end
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([coords],)
 Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Float64,3}(undef, 3, 3, 0))
 
-Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:AbstractProteinChain}) = Makie.convert_arguments(R, map(chain -> chain.backbone, chains))
-Makie.convert_arguments(R::Type{<:Ribbon}, chain::AbstractProteinChain) = Makie.convert_arguments(R, [chain])
+Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain}) = Makie.convert_arguments(R, map(chain -> get_backbone(chain), chains))
+Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
 
 Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, args...) = Makie.convert_arguments(R, read(path, ProteinStructure, args...))
 
 """
-    ribbon_scene(chains::AbstractVector{<:ProteinChains.AbstractProteinChain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+    ribbon_scene(chains::AbstractVector{<:ProteinChains.ProteinChain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
 Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
@@ -64,5 +64,5 @@ end
 
 import BioStructures
 
-Makie.convert_arguments(R::Type{<:Ribbon}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(R, ProteinStructure(structure))
-Makie.convert_arguments(R::Type{<:Ribbon}, chain::BioStructures.Chain) = Makie.convert_arguments(R, ProteinChain(chain))
+Makie.convert_arguments(R::Type{<:Ribbon}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(R, ProteinStructure{Float64}(structure))
+Makie.convert_arguments(R::Type{<:Ribbon}, chain::BioStructures.Chain) = Makie.convert_arguments(R, ProteinChain{Float64}(chain))
