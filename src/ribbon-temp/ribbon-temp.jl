@@ -57,7 +57,7 @@ julia> ribbon_scene(pdb"1OVE")
 function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
     cam3d!(scene; camcontrols...)
-    ribbon!(scene, args...; kwargs...)
+    isempty(args) || ribbon!(scene, args...; kwargs...)
     isempty(camcontrols) && center!(scene)
     return scene
 end
