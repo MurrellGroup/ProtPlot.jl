@@ -1,7 +1,7 @@
 # <img width="25%" src="./images/sticker.png" align="right" /> ProtPlot
 
-[![Latest Release](https://img.shields.io/github/release/MurrellGroup/ProtPlot.jl.svg)](https://github.com/MurrellGroup/ProtPlot.jl/releases/latest)
-[![MIT license](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/license/MIT)
+[![Dev](https://img.shields.io/badge/docs-stable-blue.svg)](https://MurrellGroup.github.io/ProtPlot.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MurrellGroup.github.io/ProtPlot.jl/dev/)
 [![Build Status](https://github.com/MurrellGroup/ProtPlot.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/MurrellGroup/ProtPlot.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/MurrellGroup/ProtPlot.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/MurrellGroup/ProtPlot.jl)
 

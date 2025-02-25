@@ -1,6 +1,4 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-/Manifest.toml
-gifs
-*CLOPS*
+Manifest.toml
