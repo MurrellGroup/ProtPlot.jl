@@ -43,16 +43,10 @@ Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain
 Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
 
 """
-    ribbon_scene(chains::AbstractVector{<:ProteinChains.ProteinChain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
+    ribbon_scene(chain_backbones::AbstractVector{<:AbstractArray{T,3}}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 
 Render a protein as a ribbon diagram. The display will be automatically centered on the rendered ribbon,
 unless the user supplies `camcontrols` (see Makie's camera documentation for details).
-
-## Example
-
-```jldoctest
-julia> ribbon_scene(pdb"1OVE")
-```
 """
 function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs...)
     scene = Scene(backgroundcolor=backgroundcolor)
