@@ -34,13 +34,13 @@ function Makie.plot!(ribbon::Ribbon{<:Tuple{<:AbstractVector{<:AbstractArray{T,3
     return ribbon
 end
 
+Makie.args_preferred_axis(::Type{<:Ribbon}, chains) = LScene
+
 Makie.convert_arguments(::Type{<:Ribbon}, chain_backbone::AbstractArray{T,3}) where T<:Real = ([chain_backbone],)
 Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Float64,3}(undef, 3, 3, 0))
 
 Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain}) = Makie.convert_arguments(R, map(chain -> get_backbone(chain), chains))
 Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
-
-Makie.convert_arguments(R::Type{<:Ribbon}, path::AbstractString, args...) = Makie.convert_arguments(R, read(path, ProteinStructure, args...))
 
 """
     ribbon_scene(chains::AbstractVector{<:ProteinChains.ProteinChain}; backgroundcolor=:black, camcontrols=(;), kwargs...)
@@ -61,8 +61,6 @@ function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs..
     isempty(camcontrols) && center!(scene)
     return scene
 end
-
-import BioStructures
 
 Makie.convert_arguments(R::Type{<:Ribbon}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(R, ProteinStructure{Float64}(structure))
 Makie.convert_arguments(R::Type{<:Ribbon}, chain::BioStructures.Chain) = Makie.convert_arguments(R, ProteinChain{Float64}(chain))
