@@ -78,3 +78,6 @@ Use the `camcontrols` keyword to control the initial view in a `ribbon_scene` ca
 ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
 ![camera](images/1ASS-camera.png)
+
+## See also
+- [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) (designed for more interactivity)
