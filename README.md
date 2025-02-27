@@ -1,4 +1,4 @@
-# <img width="25%" src="./images/sticker.png" align="right" /> ProtPlot
+# <img width="25%" src="./docs/src/assets/logo.png" align="right" /> ProtPlot
 
 [![Dev](https://img.shields.io/badge/docs-stable-blue.svg)](https://MurrellGroup.github.io/ProtPlot.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MurrellGroup.github.io/ProtPlot.jl/dev/)
@@ -29,7 +29,7 @@ using ProtPlot
 # Create and display a ribbon plot in an interactive window
 ribbon_scene("test/data/1ASS.pdb", backgroundcolor=:black, colormap=:jet)
 ```
-![plain gradient](images/1ASS.png)
+![plain gradient](/docs/src/assets/1ASS.png)
 
 ## Customizing colors
 
@@ -46,7 +46,7 @@ colors = rand.(length.(chains))
 
 ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
-![random colors](images/1ASS-color.png)
+![random colors](/docs/src/assets/1ASS-color.png)
 
 ## Attributes
 You may customize the geometry of the ribbon by specifying the value of attributes in the keyword arguments of your call. Here's a list of available attributes and their defaults:
@@ -77,7 +77,9 @@ Use the `camcontrols` keyword to control the initial view in a `ribbon_scene` ca
 ```julia
 ribbon_scene("test/data/1ASS.pdb", camcontrols=(; lookat=Vec3f(30, 0, 60), eyeposition=Vec3f(160, -75, 0), upvector=Vec3f(0, 0, 1)))
 ```
-![camera](images/1ASS-camera.png)
+![camera](/docs/src/assets/1ASS-camera.png)
 
 ## See also
 - [BioMakie.jl](https://github.com/BioJulia/BioMakie.jl) (designed for more interactivity)
+
+<video autoplay loop muted playsinline controls src="./docs/frames.mp4" style="max-height: 100vh;"/>

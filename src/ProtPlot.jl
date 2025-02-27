@@ -19,8 +19,11 @@ export AtomPlot, atomplot, atomplot!
 include("ramachandran.jl")
 export Ramachandran, ramachandran, ramachandran!
 
-const _ProteinPlot = Union{Ribbon, AtomPlot, Ramachandran}
+include("spatialgraph.jl")
+export SpatialGraphPlot, spatialgraphplot, spatialgraphplot!
 
-Makie.convert_arguments(P::Type{<:_ProteinPlot}, path::AbstractString) = Makie.convert_arguments(P, BioStructures.retrievepdb(path))
+const _ProteinPlot = Union{Ribbon, AtomPlot, Ramachandran, SpatialGraphPlot}
+
+Makie.convert_arguments(P::Type{<:_ProteinPlot}, path::AbstractString, args...) = Makie.convert_arguments(P, BioStructures.retrievepdb(path), args...)
 
 end

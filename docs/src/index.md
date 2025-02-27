@@ -2,7 +2,7 @@
 CurrentModule = ProtPlot
 ```
 
-# ProteinChains
+# ProtPlot
 
 Documentation for [ProtPlot](https://github.com/MurrellGroup/ProtPlot.jl).
 

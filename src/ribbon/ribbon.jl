@@ -42,6 +42,8 @@ Makie.convert_arguments(R::Type{<:Ribbon}) = Makie.convert_arguments(R, Array{Fl
 Makie.convert_arguments(R::Type{<:Ribbon}, chains::AbstractVector{<:ProteinChain}) = Makie.convert_arguments(R, map(chain -> get_backbone(chain), chains))
 Makie.convert_arguments(R::Type{<:Ribbon}, chain::ProteinChain) = Makie.convert_arguments(R, [chain])
 
+Makie.convert_arguments(R::Type{<:Ribbon}, frames::Frames) = Makie.convert_arguments(R, frames(STANDARD_RESIDUE))
+
 """
     ribbon_scene(chain_backbones::AbstractVector{<:AbstractArray{T,3}}; backgroundcolor=:black, camcontrols=(;), kwargs...)
 

@@ -1,5 +1,22 @@
+using WGLMakie
+
 using ProtPlot
-using Documenter
+using Documenter, Literate
+
+LITERATE_INPUT = joinpath(@__DIR__, "..", "examples")
+LITERATE_OUTPUT = OUTPUT = joinpath(@__DIR__, "src/generated")
+
+for (root, _, files) ∈ walkdir(LITERATE_INPUT), file ∈ files
+    @show root, files
+    # ignore non julia files
+    splitext(file)[2] == ".jl" || continue
+    # full path to a literate script
+    ipath = joinpath(root, file)
+    # generated output path
+    opath = splitdir(replace(ipath, LITERATE_INPUT=>LITERATE_OUTPUT))[1]
+    # generate the markdown file calling Literate
+    Literate.markdown(ipath, opath)
+end
 
 DocMeta.setdocmeta!(
     ProtPlot,
@@ -19,6 +36,10 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Plot types" => [
+            "AtomPlot" => "generated/atomplot.md",
+            "SpatialGraphPlot" => "generated/spatialgraphplot.md",
+        ],
     ],
     doctest=true,
 )

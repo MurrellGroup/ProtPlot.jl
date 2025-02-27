@@ -33,18 +33,22 @@ function render!(ribbon::Ribbon, chain_backbones::Vector{Array{T,3}}) where T<:R
     colors = ribbon.colors[]
     length(chain_backbones) == length(secondary_structures) || throw(ArgumentError("Chains and secondary structures vector must have the same length"))
     length(chain_backbones) == length(colors) || throw(ArgumentError("Chains and colors vector must have the same length"))
-    keepers = findall(c -> size(c, 3) > 1, chain_backbones)
-    for (chain_backbone, secondary_structure, color) in zip(chain_backbones[keepers], secondary_structures[keepers], colors[keepers])
+    for (chain_backbone, secondary_structure, color) in zip(chain_backbones, secondary_structures, colors)
         chain_length = size(chain_backbone, 3)
         chain_length == length(secondary_structure) || throw(ArgumentError("coordinates and secondary structure size must match"))
         chain_length == length(color) || throw(ArgumentError("Chain and color must have the same length"))
 
-        partition_ranges = filter(r -> length(r) > 1, get_subchain_ranges(chain_backbone))
+        partition_ranges = get_subchain_ranges(chain_backbone)
         chain_backbone_partitions = [chain_backbone[:, :, r] for r in partition_ranges]
         secondary_structure_partitions = [secondary_structure[r] for r in partition_ranges]
         color_partitions = [color[r] for r in partition_ranges]
         for (chain_backbone, secondary_structure, color) in zip(chain_backbone_partitions, secondary_structure_partitions, color_partitions)
-            render!(ribbon, chain_backbone, secondary_structure, color, ribbon.colormap)
+            if size(chain_backbone, 3) > 1
+                render!(ribbon, chain_backbone, secondary_structure, color, ribbon.colormap)
+            else
+                sphere = Sphere(Point3f(chain_backbone[:, 2, 1]), ribbon.coil_diameter[])
+                mesh!(ribbon, sphere; color=:lightgray)
+            end
         end
         render_lines_between_subchains!(ribbon, chain_backbone_partitions)
     end
