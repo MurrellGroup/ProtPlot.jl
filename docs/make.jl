@@ -1,7 +1,8 @@
-using WGLMakie
-
+using GLMakie
 using ProtPlot
 using Documenter, Literate
+
+GLMakie.activate!(px_per_unit = 2)
 
 LITERATE_INPUT = joinpath(@__DIR__, "..", "examples")
 LITERATE_OUTPUT = OUTPUT = joinpath(@__DIR__, "src/generated")

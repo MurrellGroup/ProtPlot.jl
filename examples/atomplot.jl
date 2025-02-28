@@ -41,7 +41,7 @@ end;
 
 # ## Animation
 
-using WGLMakie, ProtPlot, Printf
+using GLMakie, ProtPlot, Printf
 set_theme!(theme_black())
 
 time = Observable(0.0)
@@ -57,7 +57,7 @@ framesₜ = @lift interpolate_frames(frames₀, frames₁, $time)
 
 p = atomplot!(ax, framesₜ; color=repeat(range(0, 1, size(frames₁.rotations, 3)), inner=3), colormap=:jet)
 
-record(fig, "../../src/generated/frames.mp4", -0.2:0.01:1.5, framerate=48) do t
+record(fig, "frames.mp4", -0.2:0.01:1.5, framerate=48) do t
     if 0 < t <= 1
         time[] = t
     end
@@ -67,9 +67,4 @@ record(fig, "../../src/generated/frames.mp4", -0.2:0.01:1.5, framerate=48) do t
     end
     autolimits!(ax)
 end;
-
-#=
-```@raw html
-<video autoplay loop muted playsinline controls src="../frames.mp4" style="max-height: 60vh;"/>
-```
-=#
+# ![](frames.mp4)

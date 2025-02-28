@@ -38,7 +38,7 @@ end;
 
 # ## Animation
 
-using WGLMakie, ProtPlot, Printf
+using GLMakie, ProtPlot, Printf
 set_theme!(theme_black())
 
 time = Observable(0.0)
@@ -60,9 +60,11 @@ for (graph, color) in zip(graphs, [:blue, :red])
 end
 
 p = atomplot!(ax, framesₜ;
-    color=repeat(range(0, 1, n), inner=3), colormap=:jet, alpha=0.5)
+    color=repeat(range(0, 1, n), inner=3), colormap=:jet, alpha=0.5);
 
-record(fig, "../../src/generated/graphs.mp4", enumerate(-0.2:0.01:1.5), framerate=48) do (i, t)
+#
+
+record(fig, "graphs.mp4", enumerate(-0.2:0.01:1.5), framerate=48) do (i, t);
     if 0 < t <= 1
         time[] = t
         if i % 5 == 0
@@ -78,10 +80,4 @@ record(fig, "../../src/generated/graphs.mp4", enumerate(-0.2:0.01:1.5), framerat
     autolimits!(ax)
 end;
 
-#=
-```@raw html
-<div style="display: flex; justify-content: center; width: 100%;">
-    <video autoplay loop muted playsinline controls src="../assets/graphs.mp4" style="max-height: 60vh;"></video>
-</div>
-```
-=#
+# ![](graphs.mp4)
