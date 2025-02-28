@@ -44,26 +44,32 @@ jobs:
         with:
           file: lcov.info
   docs:
-    name: Documentation
+    name: Build and deploy documentation
     runs-on: ubuntu-latest
-    permissions:
-      actions: write # needed to allow julia-actions/cache to proactively delete old caches that it has created
-      contents: write
-      statuses: write
     steps:
+      - name: Install binary dependencies
+        run: sudo apt-get update && sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v2
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v4
+      - uses: julia-actions/setup-julia@latest
         with:
           version: '1'
       - uses: julia-actions/cache@v2
-      - name: Configure doc environment
-        shell: julia --project=docs --color=yes {0}
+      - name: xvfb-run
         run: |
-          using Pkg
-          Pkg.develop(PackageSpec(path=pwd()))
-          Pkg.instantiate()
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-docdeploy@v1
+          xvfb-run -s '-screen 0 1024x768x24'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+          DISPLAY: ':0'
+          DATADEPS_ALWAYS_ACCEPT: 'true'
+          RASTERDATASOURCES_PATH: '~/.julia/artifacts/RasterDataSources'
+      - uses: julia-actions/julia-docdeploy@v1
+        with:
+          prefix: xvfb-run
+          install-package: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }} # If authenticating with SSH deploy key
+          DISPLAY: ':0'
+          DATADEPS_ALWAYS_ACCEPT: 'true'
+          RASTERDATASOURCES_PATH: '~/.julia/artifacts/RasterDataSources'

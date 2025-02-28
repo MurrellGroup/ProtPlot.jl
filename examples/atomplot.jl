@@ -55,7 +55,10 @@ frames₁ = Frames(chain)
 frames₀ = initial_frames(frames₁)
 framesₜ = @lift interpolate_frames(frames₀, frames₁, $time)
 
-p = atomplot!(ax, framesₜ; color=repeat(range(0, 1, size(frames₁.rotations, 3)), inner=3), colormap=:jet)
+p = atomplot!(ax, framesₜ;
+    color=repeat(range(0, 1, size(frames₁.rotations, 3)), inner=3), colormap=:jet);
+
+#
 
 record(fig, "frames.mp4", -0.2:0.01:1.5, framerate=48) do t
     if 0 < t <= 1
