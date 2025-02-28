@@ -18,8 +18,8 @@ function initial_frames(frames₁::Frames)
 end
 
 function interpolate_frames(frames₀::Frames, frames₁::Frames, t::Number)
-    M = Rotations(3) # rotation manifold
-    E = Euclidean(3) # translation manifold
+    M = Rotations(3)
+    E = Euclidean(3)
     Rₜ = stack(axes(frames₀.rotations, 3)) do i
         R₀ = frames₀.rotations[:,:,i]
         R₁ = frames₁.rotations[:,:,i]
