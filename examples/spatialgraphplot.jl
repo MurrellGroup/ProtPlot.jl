@@ -1,4 +1,4 @@
-# SpatialGraphPlot 
+# # SpatialGraphPlot 
 
 # ## Setup
 
@@ -18,21 +18,18 @@ function initial_frames(frames₁::Frames)
 end
 
 function interpolate_frames(frames₀::Frames, frames₁::Frames, t::Number)
-    SO3 = SpecialOrthogonal(3) # rotation manifold
-    E = Euclidean(3)           # translation manifold
-
+    M = Rotations(3) # rotation manifold
+    E = Euclidean(3) # translation manifold
     Rₜ = stack(axes(frames₀.rotations, 3)) do i
-        R₀ = frames₀.rotations[:, :, i]
-        R₁ = frames₁.rotations[:, :, i]
-        exp(SO3, R₀, t * log(SO3, R₀, R₁))
+        R₀ = frames₀.rotations[:,:,i]
+        R₁ = frames₁.rotations[:,:,i]
+        exp(M, R₀, t * log(M, R₀, R₁))
     end
-
     tₜ = stack(axes(frames₀.translations, 2)) do i
-        t₀ = frames₀.translations[:, i]
-        t₁ = frames₁.translations[:, i]
+        t₀ = frames₀.translations[:,i]
+        t₁ = frames₁.translations[:,i]
         exp(E, t₀, t * log(E, t₀, t₁))
     end
-
     return Frames(Rₜ, tₜ)
 end;
 
@@ -56,7 +53,7 @@ k, n = 1, length(chain)
 new_graph() = rand(n, n) .< k / n
 graphs = [Observable(new_graph()) for _ in 1:2]
 for (graph, color) in zip(graphs, [:blue, :red])
-    spatialgraphplot!(ax, (@lift eachcol(($framesₜ).translations)), graph; color, alpha=0.2, linewidth=2)
+    spatialgraphplot!(ax, (@lift eachcol(($framesₜ).translations)), graph; color, alpha=0.3, linewidth=1.5)
 end
 
 p = atomplot!(ax, framesₜ;

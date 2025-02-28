@@ -21,21 +21,16 @@ function initial_frames(frames₁::Frames)
 end
 
 function interpolate_frames(frames₀::Frames, frames₁::Frames, t::Number)
-    SO3 = SpecialOrthogonal(3) # rotation manifold
-    E = Euclidean(3)           # translation manifold
-
+    M = Rotations(3) # rotation manifold
+    E = Euclidean(3) # translation manifold
     Rₜ = stack(axes(frames₀.rotations, 3)) do i
-        R₀ = frames₀.rotations[:, :, i]
-        R₁ = frames₁.rotations[:, :, i]
-        exp(SO3, R₀, t * log(SO3, R₀, R₁))
+        R₀, R₁ = frames₀.rotations[:,:,i], frames₁.rotations[:,:,i]
+        exp(M, R₀, t * log(M, R₀, R₁))
     end
-
     tₜ = stack(axes(frames₀.translations, 2)) do i
-        t₀ = frames₀.translations[:, i]
-        t₁ = frames₁.translations[:, i]
+        t₀, t₁ = frames₀.translations[:,i], frames₁.translations[:,i]
         exp(E, t₀, t * log(E, t₀, t₁))
     end
-
     return Frames(Rₜ, tₜ)
 end;
 
