@@ -3,6 +3,7 @@
         secondary_structures = nothing,
         colors = nothing,
         colormap = :jet,
+        colorrange = (0, 1),
 
         coil_diameter = 0.4,
         coil_spline_quality = 20,

@@ -12,6 +12,7 @@ atom_colors = Dict(
 @recipe(AtomPlot, atoms) do scene
     Attributes(
         colormap = :jet,
+        colorrange = nothing,
         color = atom_colors,
         default_color = :gray40,
         size = Dict(),
@@ -38,6 +39,7 @@ function Makie.plot!(atomplot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
     meshscatter!(atomplot, positions;
         markersize, color,
         atomplot.colormap,
+        atomplot.colorrange,
         atomplot.alpha,
         transform_marker=true, # prevents constant apparant size in Axis3 containers
     )
