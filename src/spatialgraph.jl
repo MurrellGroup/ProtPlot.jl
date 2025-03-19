@@ -20,7 +20,7 @@ end
 Makie.args_preferred_axis(::Type{<:SpatialGraphPlot}, positions, edges) = LScene
 
 function Makie.convert_arguments(P::Type{<:SpatialGraphPlot}, chains::AbstractVector{<:ProteinChain}, g)
-    positions = @views eachcol(hcat(map(c -> Backbone(c).coords, chains)...))
+    positions = @views eachcol(hcat(map(c -> Backbone(c).coords[:,2:3:end], chains)...))
     Makie.convert_arguments(P, positions, g)
 end
 
