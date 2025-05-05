@@ -59,5 +59,5 @@ function ribbon_scene(args...; backgroundcolor=:black, camcontrols=(;), kwargs..
     return scene
 end
 
-Makie.convert_arguments(R::Type{<:Ribbon}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(R, ProteinStructure{Float64}(structure))
-Makie.convert_arguments(R::Type{<:Ribbon}, chain::BioStructures.Chain) = Makie.convert_arguments(R, ProteinChain{Float64}(chain))
+Makie.convert_arguments(R::Type{<:Ribbon}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(R, ProteinStructure(structure))
+Makie.convert_arguments(R::Type{<:Ribbon}, chain::BioStructures.Chain) = Makie.convert_arguments(R, ProteinChain(chain))
