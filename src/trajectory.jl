@@ -10,7 +10,7 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     ts, xt_locs,xt_rots,xt_aas,x̂1_locs,x̂1_rots,x̂1_aas = trajectory
     chainids = vcat([repeat([i], length(samp[i])) for i in 1:length(samp)]...)
     steps = length(ts)
-    frozen_prot = ProFlowDemo.ProteinChains.masked_out_structure(samp, pos_inds)
+    frozen_prot = masked_out_structure(samp, pos_inds)
     set_theme!(theme_black())
     step = Observable(Int(round(steps/2)))
     timestep = Observable(1)
