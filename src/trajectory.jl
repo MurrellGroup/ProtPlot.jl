@@ -7,7 +7,8 @@ end
 indexed_frames(locs, rots, step, inds) = Frames(rots[step][:,:,inds], 10 .* locs[step][:,inds])
 triplicate(x) = repeat(x, inner = 3)
 function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajectory;
-                            aa_inds = trues(sum(length.(samp))), pos_inds = trues(sum(length.(samp))), rotation = 0.03,
+                            aa_inds = trues(sum(length.(samp))), pos_inds = trues(sum(length.(samp))), 
+                            rotation = 0.03, end_rotation_speedup = 0, size = (1280, 720), framerate = 22, 
                             kwargs...)
     ts, xt_locs,xt_rots,xt_aas,x̂1_locs,x̂1_rots,x̂1_aas = trajectory
     chainids = vcat([repeat([i], length(samp[i])) for i in 1:length(samp)]...)
@@ -16,9 +17,13 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     set_theme!(theme_black())
     step = Observable(Int(round(steps/2)))
     timestep = Observable(1)
-    fig = Makie.Figure(size = (1500, 1500), figure_padding = 1)
-    xtax = Axis3(fig[1:5, 1], perspectiveness=0.2, aspect=:data; kwargs...)
-    x̂1ax = Axis3(fig[1:5, 2], perspectiveness=0.2, aspect=:data; kwargs...)
+    fig = Makie.Figure(size = size, figure_padding = 1)
+    xtax = Axis3(fig[1:5, 1], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
+    x̂1ax = Axis3(fig[1:5, 2], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
+
+    Label(fig[1:5, 1, Top()], "xₜ", valign = :bottom, font = :bold, fontsize = 20, padding = (0, 0, 0, 0))
+    Label(fig[1:5, 2, Top()], "x̂₁", valign = :bottom, font = :bold, fontsize = 20, padding = (0, 0, 0, 0))
+    
     AAax = Axis(fig[6, 1:2])
     hidespines!(xtax)
     hidespines!(x̂1ax)
@@ -26,6 +31,7 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     hidedecorations!(x̂1ax)
     xtax.azimuth[] = -0.2 #pi/2
     xtax.elevation[] = 0.0 #pi/2
+    
     x̂1ax.azimuth[] = -0.2 #pi/2
     x̂1ax.elevation[] = 0.0 #pi/2
     colorₜ = @lift triplicate(xt_aas[$step][aa_inds])./21
@@ -47,7 +53,9 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     x,grp,freq = wider(x̂1_aas[1][:,aa_inds])
     freq_obs = @lift (x̂1_aas[$step][:,aa_inds])[:]
     Makie.barplot!(AAax, x, freq_obs, stack = grp, color = [2, 18, 1, 17, 12, 15, 13, 4, 16, 3, 5, 8, 10, 20, 14, 9, 6, 11, 19, 7, 21][grp], colormap = :turbo)
-    record(fig, export_path, -5:length(ts)+150, framerate=15) do t
+    colgap!(fig.layout, 0)
+    rowgap!(fig.layout, 0)
+    record(fig, export_path, -5:length(ts)+150, framerate=framerate) do t
         if t == -5
             step[] = 1
             timestep[] = 1
@@ -73,12 +81,11 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
             delete!(xtax, xtp)
             delete!(x̂1ax, x̂1p)
         end
+        x̂1ax.azimuth[] += rotation
+        xtax.azimuth[] += rotation
         if t >= length(ts)+50
-            x̂1ax.azimuth[] += 2pi/100
-            xtax.azimuth[] += 2pi/100
-        else
-            x̂1ax.azimuth[] += rotation
-            xtax.azimuth[] += rotation
+            x̂1ax.azimuth[] += end_rotation_speedup * rotation
+            xtax.azimuth[] += end_rotation_speedup * rotation
         end
     end
 end
