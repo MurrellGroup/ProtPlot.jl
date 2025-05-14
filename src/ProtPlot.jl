@@ -22,6 +22,9 @@ export Ramachandran, ramachandran, ramachandran!
 include("spatialgraph.jl")
 export SpatialGraphPlot, spatialgraphplot, spatialgraphplot!
 
+include("trajectory.jl")
+export animate_trajectory
+
 const _ProteinPlot = Union{Ribbon, AtomPlot, Ramachandran, SpatialGraphPlot}
 
 Makie.convert_arguments(P::Type{<:_ProteinPlot}, path::AbstractString, args...) = Makie.convert_arguments(P, BioStructures.retrievepdb(path), args...)
