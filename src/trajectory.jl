@@ -36,7 +36,7 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     x̂1ax.azimuth[] = -0.2 #pi/2
     x̂1ax.elevation[] = 0.0 #pi/2
     colorₜ = if color_by_chain
-        @lift triplicate((chainids .- 1) ./ (length(samp) - 1))
+        triplicate((chainids .- 1) ./ (length(samp) - 1))
     else
         @lift triplicate(xt_aas[$step][aa_inds]) ./ 21
     end
