@@ -7,12 +7,12 @@ end
 indexed_frames(locs, rots, step, inds) = Frames(rots[step][:,:,inds], 10 .* locs[step][:,inds])
 triplicate(x) = repeat(x, inner = 3)
 function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajectory;
-                            aa_inds = trues(sum(length.(samp))), pos_inds = trues(sum(length.(samp))), 
+                            aa_inds = trues(sum(length, samp)), pos_inds = trues(sum(length, samp)), 
                             rotation = 0.03, end_rotation_speedup = 0, size = (1280, 720), framerate = 22,
-                            theme = :black, chain_colors = nothing, atom_colormap = :jet,
+                            theme = :black, color_by_chain = false, atom_colormap = :jet,
                             kwargs...)
     ts, xt_locs,xt_rots,xt_aas,x̂1_locs,x̂1_rots,x̂1_aas = trajectory
-    chainids = vcat([repeat([i], length(samp[i])) for i in 1:length(samp)]...)
+    chainids = reduce(vcat, fill(i, length(chain)) for (i, chain) in enumerate(samp))
     steps = length(ts)
     frozen_prot = masked_out_structure(samp, pos_inds)
     theme == :black && set_theme!(theme_black())
@@ -35,10 +35,10 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     
     x̂1ax.azimuth[] = -0.2 #pi/2
     x̂1ax.elevation[] = 0.0 #pi/2
-    colorₜ = if isnothing(chain_colors)
-        @lift triplicate(xt_aas[$step][aa_inds])./21
+    colorₜ = if color_by_chain
+        @lift triplicate((chainids .- 1) ./ (length(samp) - 1))
     else
-        @lift triplicate(reduce(vcat, fill(i - 1, length(chain)) for (i, chain) in enumerate(samp)) ./ (length(samp) - 1))
+        @lift triplicate(xt_aas[$step][aa_inds]) ./ 21
     end
     #Xt frames:
     xtframes0 = indexed_frames(xt_locs, xt_rots, 1, pos_inds)
