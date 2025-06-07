@@ -8,16 +8,17 @@ indexed_frames(locs, rots, step, inds) = Frames(rots[step][:,:,inds], 10 .* locs
 triplicate(x) = repeat(x, inner = 3)
 function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajectory;
                             aa_inds = trues(sum(length.(samp))), pos_inds = trues(sum(length.(samp))), 
-                            rotation = 0.03, end_rotation_speedup = 0, size = (1280, 720), framerate = 22, 
+                            rotation = 0.03, end_rotation_speedup = 0, size = (1280, 720), framerate = 22,
+                            theme = :black,
                             kwargs...)
     ts, xt_locs,xt_rots,xt_aas,x̂1_locs,x̂1_rots,x̂1_aas = trajectory
     chainids = vcat([repeat([i], length(samp[i])) for i in 1:length(samp)]...)
     steps = length(ts)
     frozen_prot = masked_out_structure(samp, pos_inds)
-    set_theme!(theme_black())
+    theme == :black && set_theme!(theme_black())
     step = Observable(Int(round(steps/2)))
     timestep = Observable(1)
-    fig = Makie.Figure(size = size, figure_padding = 1)
+    fig = Makie.Figure(; size, backgroundcolor, figure_padding = 1)
     xtax = Axis3(fig[1:5, 1], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
     x̂1ax = Axis3(fig[1:5, 2], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
 
