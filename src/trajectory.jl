@@ -9,7 +9,7 @@ triplicate(x) = repeat(x, inner = 3)
 function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajectory;
                             aa_inds = trues(sum(length.(samp))), pos_inds = trues(sum(length.(samp))), 
                             rotation = 0.03, end_rotation_speedup = 0, size = (1280, 720), framerate = 22,
-                            theme = :black,
+                            theme = :black, chain_colors = nothing, atom_colormap = :jet,
                             kwargs...)
     ts, xt_locs,xt_rots,xt_aas,x̂1_locs,x̂1_rots,x̂1_aas = trajectory
     chainids = vcat([repeat([i], length(samp[i])) for i in 1:length(samp)]...)
@@ -35,19 +35,23 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     
     x̂1ax.azimuth[] = -0.2 #pi/2
     x̂1ax.elevation[] = 0.0 #pi/2
-    colorₜ = @lift triplicate(xt_aas[$step][aa_inds])./21
+    colorₜ = if isnothing(chain_colors)
+        @lift triplicate(xt_aas[$step][aa_inds])./21
+    else
+        @lift triplicate(reduce(vcat, fill(i - 1, length(chain)) for (i, chain) in enumerate(samp)) ./ (length(samp) - 1))
+    end
     #Xt frames:
     xtframes0 = indexed_frames(xt_locs, xt_rots, 1, pos_inds)
     xtframesₜ = @lift indexed_frames(xt_locs, xt_rots, $step, pos_inds)
     fixed_xtribbon = ((length(frozen_prot) > 0) && (sum(length.(frozen_prot)) > 0)) ? ribbon!(xtax.scene, frozen_prot, colormap = :matter) : plot!(zeros(0))
     xtribbon = ribbon!(xtax, samp) #We need these to define the full expanse of the final state
-    xtp = atomplot!(xtax.scene, xtframesₜ, color = colorₜ, colormap=:jet, colorrange = (0.0, 1.0));
+    xtp = atomplot!(xtax.scene, xtframesₜ, color = colorₜ, colormap=atom_colormap, colorrange = (0.0, 1.0));
     #X̂1 frames:
     x̂1frames0 = indexed_frames(x̂1_locs, x̂1_rots, 1, pos_inds)
     x̂1framesₜ = @lift indexed_frames(x̂1_locs, x̂1_rots, $step, pos_inds)
     fixed_x̂1ribbon = ((length(frozen_prot) > 0) && (sum(length.(frozen_prot)) > 0)) ? ribbon!(x̂1ax.scene, frozen_prot, colormap = :matter) : plot!(zeros(0))
     x̂1ribbon = ribbon!(x̂1ax, samp) #We need these to define the full expanse of the final state
-    x̂1p = atomplot!(x̂1ax.scene, x̂1framesₜ, color = colorₜ, colormap=:jet, colorrange = (0.0, 1.0));
+    x̂1p = atomplot!(x̂1ax.scene, x̂1framesₜ, color = colorₜ, colormap=atom_colormap, colorrange = (0.0, 1.0));
     #AA bar plot:
     aatitle = @lift $timestep <= length(ts) ? "t = $(rpad(round(ts[$timestep], digits = 3), 5, "0"))" : "t = $(rpad(round(1.0, digits = 3), 5, "0"))"
     Label(fig[6, 1:2, Top()], aatitle, valign = :bottom, font = :bold, padding = (0, 0, 0, 0))
