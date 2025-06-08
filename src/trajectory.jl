@@ -18,7 +18,7 @@ function animate_trajectory(export_path, samp::ProtPlot.ProteinStructure, trajec
     theme == :black && set_theme!(theme_black())
     step = Observable(Int(round(steps/2)))
     timestep = Observable(1)
-    fig = Makie.Figure(; size, backgroundcolor, figure_padding = 1)
+    fig = Makie.Figure(; size, figure_padding = 1)
     xtax = Axis3(fig[1:5, 1], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
     x̂1ax = Axis3(fig[1:5, 2], perspectiveness=0.2, protrusions = (0,0,0,0), aspect=:data, width = 1000, height = 1000, tellwidth = false, tellheight = false; kwargs...)
 
