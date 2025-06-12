@@ -41,6 +41,18 @@ ribbon_scene(chains, colors=colors, colormap=:hsv)
 ```
 ![random colors](/docs/src/assets/1ASS-color.png)
 
+Chains can be colored by chain using something like:
+
+```julia
+colormap = [:royalblue, :violet, :limegreen, :chocolate1]
+colors = [fill(i-1, l) / (length(colormap)-1) for (i, l) in enumerate(length.(struc))]
+ribbon!(scene, chains; colors, colormap)
+```
+
+and then you might get something like:
+
+<img width="25%" src="./docs/src/assets/color_by_chain.png" />
+
 ## Camera controls
 
 Makie allows programmatic control over the [camera](https://docs.makie.org/stable/explanations/cameras/index.html).
