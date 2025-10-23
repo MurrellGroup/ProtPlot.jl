@@ -16,14 +16,7 @@ export ribbon_scene
 include("atomplot.jl")
 export AtomPlot, atomplot, atomplot!
 
-include("ramachandran.jl")
-export Ramachandran, ramachandran, ramachandran!
-
-include("spatialgraph.jl")
-export SpatialGraphPlot, spatialgraphplot, spatialgraphplot!
-
-include("trajectory.jl")
-export animate_trajectory
+include("misc/misc.jl")
 
 const _ProteinPlot = Union{Ribbon, AtomPlot, Ramachandran, SpatialGraphPlot}
 

@@ -18,17 +18,13 @@ ProteinChains = "b8e8f2a5-48d3-44f1-ba0d-c71cb7726ff8"
 AssigningSecondaryStructure = "0.5"
 Backboner = "0.12"
 BioStructures = "4"
-ColorTypes = "0.8, 0.9, 0.10, 0.11, 0.12"
+ColorTypes = "0.8 - 0.12"
 Dierckx = "0.5"
 Graphs = "1"
 LinearAlgebra = "1"
-Makie = "0.21.17, 0.22, 0.23"
-ProteinChains = "0.3, 0.4, 0.5, 0.6, 0.7"
+Makie = "0.21 - 0.23"
+ProteinChains = "0.3 - 0.7"
 julia = "1"
 
-[extras]
-GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test", "GLMakie"]
+[workspace]
+projects = ["test", "docs"]
