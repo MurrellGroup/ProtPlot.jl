@@ -149,7 +149,7 @@ end
 function animate_trajectory_dir(
     export_path, input_dirs;
     labels = [basename(dirpath) for dirpath in input_dirs],
-    color_by = fill(:aa, length(input_dirs)), chain_colormap = :jet, aa_colormap = :turbo, numbering_colormap = :nipy_spectral,
+    color_by = fill(:aa, length(input_dirs)), chain_colormap = :jet, aa_colormap = :turbo, numbering_colormap = :rainbow,
     rotation = 0.02, end_rotation_speedup = 0, end_ribbon_seconds = 3.0, size = (1280, 720), framerate = 24,
     theme = :black, kwargs...
 )
@@ -189,11 +189,11 @@ function animate_trajectory_dir(
         colormap = color_by[i] == :chain ? chain_colormap : color_by[i] == :aa ? aa_colormap : numbering_colormap
         color = @lift reduce(vcat, get_colors($(structures[dirpath]), color_by[i])) |> triplicate
         ribbon_colors = @lift get_colors($(structures[dirpath]), color_by[i])
-        full_label = @lift "$label: $dirpath/$(basename(dir_files[dirpath][clamp($timestep, begin, end)]))"
+        full_label = @lift "$(basename(dirpath)): $((first ∘ splitext ∘ basename)(dir_files[dirpath][clamp($timestep, begin, end)]))"
         Label(fig[1:5, i, Top()], full_label, valign = :bottom, font = :bold, fontsize = 20, padding = (0, 0, 0, 0))
         plotref = atomplot!(ax, structures[dirpath]; color, colormap, colorrange = (0.0f0, 1.0f0))
         hidespines!(ax)
-        hidedecorations!(ax) 
+        hidedecorations!(ax)
         limits!(ax, dir_bounds[dirpath]...)
         push!(axes, ax)
         push!(atomplot_refs, (; ax, plotref, dirpath, colormap, ribbon_colors))
