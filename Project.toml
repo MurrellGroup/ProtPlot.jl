@@ -1,7 +1,7 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
 authors = ["Anton Oresten <antonoresten@gmail.com>"]
-version = "0.5.12"
+version = "0.5.11"
 
 [deps]
 AssigningSecondaryStructure = "8ed43e74-60fb-4e11-99b9-91deed37aef7"
@@ -24,7 +24,7 @@ Graphs = "1"
 LinearAlgebra = "1"
 Makie = "0.21 - 0.23"
 ProteinChains = "0.3 - 0.7"
-julia = "1"
+julia = "1.10"
 
 [workspace]
 projects = ["test", "docs"]
