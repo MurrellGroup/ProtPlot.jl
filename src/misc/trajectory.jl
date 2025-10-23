@@ -190,7 +190,7 @@ function animate_trajectory_dir(
         color = @lift reduce(vcat, get_colors($(structures[dirpath]), color_by[i])) |> triplicate
         ribbon_colors = @lift get_colors($(structures[dirpath]), color_by[i])
         full_label = @lift "$(basename(dirpath)): $((first ∘ splitext ∘ basename)(dir_files[dirpath][clamp($timestep, begin, end)]))"
-        Label(fig[1:5, i, Top()], full_label, valign = :bottom, font = :bold, fontsize = 20, padding = (0, 0, 0, 0))
+        Label(fig[1:5, i, Top()], full_label, valign = :bottom, font = :bold, fontsize = 14, padding = (0, 0, 0, 0))
         plotref = atomplot!(ax, structures[dirpath]; color, colormap, colorrange = (0.0f0, 1.0f0))
         hidespines!(ax)
         hidedecorations!(ax)
