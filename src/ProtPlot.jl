@@ -3,6 +3,7 @@ module ProtPlot
 using Makie
 using ColorTypes
 
+using Backboner
 using ProteinChains
 
 import BioStructures
