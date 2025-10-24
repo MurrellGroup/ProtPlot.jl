@@ -1,6 +1,7 @@
 module ProtPlot
 
 using Makie
+using GeometryBasics
 using ColorTypes
 
 using Backboner

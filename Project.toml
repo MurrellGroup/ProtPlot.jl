@@ -1,7 +1,10 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
+version = "0.5.12"
 authors = ["Anton Oresten <antonoresten@gmail.com>"]
-version = "0.5.11"
+
+[workspace]
+projects = ["test", "docs"]
 
 [deps]
 AssigningSecondaryStructure = "8ed43e74-60fb-4e11-99b9-91deed37aef7"
@@ -9,10 +12,13 @@ Backboner = "9ac9c2a2-1cfe-46d3-b3fd-6fa470ea56a7"
 BioStructures = "de9282ab-8554-53be-b2d6-f6c222edabfc"
 ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+NearestNeighbors = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
 ProteinChains = "b8e8f2a5-48d3-44f1-ba0d-c71cb7726ff8"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 AssigningSecondaryStructure = "0.5"
@@ -20,11 +26,11 @@ Backboner = "0.12"
 BioStructures = "4"
 ColorTypes = "0.8 - 0.12"
 Dierckx = "0.5"
+GeometryBasics = "0.5.10"
 Graphs = "1"
 LinearAlgebra = "1"
 Makie = "0.21 - 0.23"
+NearestNeighbors = "0.4.22"
 ProteinChains = "0.3 - 0.7"
+StaticArrays = "1.9.15"
 julia = "1.10"
-
-[workspace]
-projects = ["test", "docs"]
