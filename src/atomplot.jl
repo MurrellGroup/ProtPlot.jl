@@ -88,7 +88,7 @@ get_bond_threshold(a, b, fallback=0.0) = max(get(BOND_THRESHOLDS, (a, b), fallba
         default_size = 0.7f0,
         bond_width = 0.25f0,
         show_bonds = false,
-        bond_threshold_tolerance = 0.35f0,
+        bond_threshold_tolerance = 0.0f0,
         alpha = 1f0,
         transform_marker = true,
     )
@@ -143,12 +143,15 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
     pairs = @lift get_pairs(atom_coords.($(plot.atoms)), $(plot.atoms), $(plot.bond_threshold_tolerance))
     bonds = @lift get_bonds(atom_coords.($(plot.atoms)), $pairs, $(plot.show_bonds))
 
+    !plot.show_bonds[] && return plot
+
     # need to recompute because {i,j}_color depending on pairs and color will fail
     # because the inputs need to be updated simultaneously. see 
     bond_colors = @lift begin
-        color = get_from_dict($(plot.color), $(plot.atoms), $(plot.default_color))
-        positions = atom_coords.($(plot.atoms))
-        pairs = get_pairs(positions, $(plot.atoms), $(plot.bond_threshold_tolerance))
+        atoms = $(plot.atoms)
+        color = get_from_dict($(plot.color), atoms, $(plot.default_color))
+        positions = atom_coords.(atoms)
+        pairs = get_pairs(positions, atoms, $(plot.bond_threshold_tolerance))
         i_color = color isa AbstractVector ? [color[i] for (i, _) in pairs] : color
         j_color = color isa AbstractVector ? [color[j] for (_, j) in pairs] : color
         return (; i_color, j_color)
@@ -161,6 +164,7 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
         marker = (@lift Cylinder(Point3f(0.0,0.0,-0.25), Point3f(0.0,0.0,0.25), $(plot.bond_width))),
         markersize = (@lift $bonds.markersize),
         color = i_color,
+        #colormap = plot.colormap,
         plot.alpha, plot.transform_marker
     )
 
@@ -168,7 +172,8 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
         rotation = (@lift $bonds.rotation),
         marker = (@lift Cylinder(Point3f(0.0,0.0,-0.25), Point3f(0.0,0.0,0.25), $(plot.bond_width))),
         markersize = (@lift $bonds.markersize),
-        color = j_color,
+        #color = j_color,
+        #colormap = plot.colormap,
         plot.alpha, plot.transform_marker
     )
 
