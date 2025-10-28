@@ -149,8 +149,8 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
         color = get_from_dict($(plot.color), $(plot.atoms), $(plot.default_color))
         positions = atom_coords.($(plot.atoms))
         pairs = get_pairs(positions, $(plot.atoms), $(plot.bond_threshold_tolerance))
-        i_color = color isa AbstractVector ? Symbol[color[i] for (i, _) in pairs] : color
-        j_color = color isa AbstractVector ? Symbol[color[j] for (_, j) in pairs] : color
+        i_color = color isa AbstractVector ? [color[i] for (i, _) in pairs] : color
+        j_color = color isa AbstractVector ? [color[j] for (_, j) in pairs] : color
         return (; i_color, j_color)
     end
     i_color = @lift $bond_colors.i_color
