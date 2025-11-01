@@ -359,3 +359,32 @@ function animate_molecule_dir(
     frame_names = [ [(first ∘ splitext ∘ basename)(f) for f in files] for files in files_per_dir ]
     animate_molecules(export_path, molecules_cache; labels, frame_names, kwargs...)
 end
+
+using ProteinChains: atom_name, atom_symbol, atom_coords
+
+shift_atom(atom, v) = Atom(atom_name(atom), atom_symbol(atom), atom_coords(atom) .+ v)
+shift_molecule(mol, v) = map(atom -> shift_atom(atom, v), mol)
+
+function static_trajectory(input_dir;
+    shift_vector=Vec3f(50.0,0,0), # offset of final molecule
+    mask_color=:orange,
+    size=(1920, 1080),
+    alpha=0.3,
+    markersize=160f0,
+    kwargs...
+)
+    files = readdir(input_dir, join=true)
+    molecules = [read_xyz(f) for f in files]
+    shift_vector_step = shift_vector / length(molecules)
+    shifted_molecules = [shift_molecule(mol, i * shift_vector_step) for (i, mol) in enumerate(molecules)]
+    all_atoms = reduce(vcat, shifted_molecules)
+    color = [get(ATOM_COLORS, sym, mask_color) for sym in atom_symbol.(all_atoms)]
+    set_theme!(theme_black())
+    fig = Figure(; size)
+    ax = Axis3(fig[1,1], aspect=:data)
+    scatter!(ax, atom_coords.(all_atoms); color, fxaa=true, alpha, markersize, transform_marker=true, depthsorting=true)
+    atomplot!(ax, shifted_molecules[end]; default_size = 0.5f0, show_bonds = true, bond_width = 0.2f0, mask_color)
+    hidespines!(ax)
+    hidedecorations!(ax)
+    fig
+end

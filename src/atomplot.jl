@@ -9,7 +9,6 @@ const ATOM_COLORS = Dict(
     "N" => :royalblue2,
     "S" => :yellow,
     "P" => :green,
-    "X" => :darkred,
 )
 
 const ATOM_SIZE_FACTORS = Dict(
@@ -83,19 +82,20 @@ get_bond_threshold(a, b, fallback=0.0) = max(get(BOND_THRESHOLDS, (a, b), fallba
         colormap = :jet,
         colorrange = nothing,
         color = ATOM_COLORS,
-        default_color = :gray40,
+        default_color = :magenta,
+        mask_color = :orange,
         size_factor = ATOM_SIZE_FACTORS,
         default_size = 0.7f0,
         bond_width = 0.25f0,
         show_bonds = false,
-        bond_threshold_tolerance = 0.0f0,
+        bond_threshold_tolerance = 0.3f0,
         alpha = 1f0,
         transform_marker = true,
     )
 end
 
-function get_from_dict(dict, atoms, default)
-    dict isa Dict ? [get(dict, atom_symbol(atom), default) for atom in atoms] : dict
+function get_from_dict(dict, atoms, default, (mask_key, mask_value)=(nothing => nothing))
+    dict isa Dict ? [atom_symbol(atom) == mask_key ? mask_value : get(dict, atom_symbol(atom), default) for atom in atoms] : dict
 end
 
 function get_pairs(positions, atoms, tolerance)
@@ -130,7 +130,7 @@ end
 function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
     positions = @lift atom_coords.($(plot.atoms))
     markersize = @lift get_from_dict($(plot.size_factor), $(plot.atoms), 1.0f0) * $(plot.default_size)
-    color = @lift get_from_dict($(plot.color), $(plot.atoms), $(plot.default_color))
+    color = @lift get_from_dict($(plot.color), $(plot.atoms), $(plot.default_color), "X" => $(plot.mask_color))
 
     meshscatter!(plot, positions;
         markersize, color,
@@ -164,7 +164,7 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
         marker = (@lift Cylinder(Point3f(0.0,0.0,-0.25), Point3f(0.0,0.0,0.25), $(plot.bond_width))),
         markersize = (@lift $bonds.markersize),
         color = i_color,
-        #colormap = plot.colormap,
+        plot.colormap,
         plot.alpha, plot.transform_marker
     )
 
@@ -172,8 +172,8 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
         rotation = (@lift $bonds.rotation),
         marker = (@lift Cylinder(Point3f(0.0,0.0,-0.25), Point3f(0.0,0.0,0.25), $(plot.bond_width))),
         markersize = (@lift $bonds.markersize),
-        #color = j_color,
-        #colormap = plot.colormap,
+        color = j_color,
+        plot.colormap,
         plot.alpha, plot.transform_marker
     )
 
