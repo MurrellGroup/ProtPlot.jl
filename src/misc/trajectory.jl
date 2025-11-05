@@ -152,7 +152,7 @@ function animate_trajectory_dir(
     export_path, input_dirs;
     labels = [basename(dirpath) for dirpath in input_dirs],
     color_by = fill(:aa, length(input_dirs)), chain_colormap = :jet, aa_colormap = :turbo, numbering_colormap = :rainbow,
-    rotation = 0.02, end_rotation_speedup = 0, end_ribbon_seconds = 3.0, size = (1280, 720), framerate = 24,
+    rotation = 0.02, rotation_offset = 0.0, end_rotation_speedup = 0, end_ribbon_seconds = 3.0, size = (1280, 720), framerate = 24,
     theme = :black, kwargs...
 )
     fig = Makie.Figure(; size, figure_padding = 1)
@@ -205,6 +205,7 @@ function animate_trajectory_dir(
     rowgap!(fig.layout, 0)
     maxlen = maximum(length, values(dir_files))
     end_extra_frames = Int(round(end_ribbon_seconds * framerate))
+    ax.azimuth[] += rotation_offset
     record(fig, export_path, -framerate:maxlen+framerate+end_extra_frames; framerate) do t
         timestep[] = t
         for ax in axes
