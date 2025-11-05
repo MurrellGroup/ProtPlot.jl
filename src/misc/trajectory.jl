@@ -131,6 +131,8 @@ function get_colors(structure, color_by::Symbol)
     end
 end
 
+extension_whitelist(whitelist...) = f -> last(splitext(f)) in whitelist
+
 """
     animate_trajectory_dir(export_path, input_dirs; kwargs...)
 
@@ -157,7 +159,7 @@ function animate_trajectory_dir(
     theme == :black && set_theme!(theme_black())
     timestep = Observable(1)
 
-    dir_files = Dict(dirpath => readdir(dirpath, join=true) for dirpath in input_dirs)
+    dir_files = Dict(dirpath => filter(extension_whitelist("pdb", "cif"), readdir(dirpath, join=true)) for dirpath in input_dirs)
     structures_all = Dict(dirpath => [backbone_only!(read(f, ProteinStructure)) for f in files] for (dirpath, files) in dir_files)
     structures = Dict(dirpath => @lift structures_all[dirpath][clamp($timestep, begin, end)] for (dirpath, files) in dir_files)
 
@@ -354,7 +356,7 @@ function animate_molecule_dir(
     export_path, input_dirs; labels = [basename(dirpath) for dirpath in input_dirs], kwargs...
 )
     length(labels) == length(input_dirs) || throw(ArgumentError("length(labels) must match number of input directories"))
-    files_per_dir = [readdir(dirpath, join=true) for dirpath in input_dirs]
+    files_per_dir = [filter(extension_whitelist("xyz"), readdir(dirpath, join=true)) for dirpath in input_dirs]
     molecules_cache = [ [read_xyz(f) for f in files] for files in files_per_dir ]
     frame_names = [ [(first ∘ splitext ∘ basename)(f) for f in files] for files in files_per_dir ]
     animate_molecules(export_path, molecules_cache; labels, frame_names, kwargs...)
@@ -373,7 +375,7 @@ function static_trajectory(input_dir;
     markersize=160f0,
     kwargs...
 )
-    files = readdir(input_dir, join=true)
+    files = filter(extension_whitelist("xyz"), readdir(input_dir, join=true))
     molecules = [read_xyz(f) for f in files]
     shift_vector_step = shift_vector / length(molecules)
     shifted_molecules = [shift_molecule(mol, i * shift_vector_step) for (i, mol) in enumerate(molecules)]
