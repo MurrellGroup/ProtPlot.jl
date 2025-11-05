@@ -205,7 +205,9 @@ function animate_trajectory_dir(
     rowgap!(fig.layout, 0)
     maxlen = maximum(length, values(dir_files))
     end_extra_frames = Int(round(end_ribbon_seconds * framerate))
-    ax.azimuth[] += rotation_offset
+    for ax in axes
+        ax.azimuth[] += rotation
+    end
     record(fig, export_path, -framerate:maxlen+framerate+end_extra_frames; framerate) do t
         timestep[] = t
         for ax in axes
