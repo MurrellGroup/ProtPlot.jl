@@ -1,0 +1,6 @@
+[deps]
+BioStructures = "de9282ab-8554-53be-b2d6-f6c222edabfc"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+ProtPlot = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
+ProteinChains = "b8e8f2a5-48d3-44f1-ba0d-c71cb7726ff8"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
