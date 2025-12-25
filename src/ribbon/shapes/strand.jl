@@ -38,7 +38,7 @@ function alternating_normal_correction!(normals::AbstractMatrix{T}) where T <: R
 end
 
 function strand_surface(
-    attributes::Attributes,
+    attributes::Union{Attributes, Makie.ComputeGraph},
     segment_range::UnitRange{Int},
     all_ca_points::AbstractMatrix{T},
     all_o_points::AbstractMatrix{T},
