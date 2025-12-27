@@ -1,5 +1,5 @@
 function coil_surface(
-    attributes::Union{Attributes, Makie.ComputeGraph},
+    attributes,
     segment_range::UnitRange{Int},
     all_ca_points::AbstractMatrix{T},
 ) where T <: Real

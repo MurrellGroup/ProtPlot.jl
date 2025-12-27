@@ -3,7 +3,7 @@ curved_path_normal(p1, p2, p3) = -normalize!(p1 - p2 + p3 - p2)
 # normal depends on second derivative of the path
 # does weird twist when second derivative changes too quickly
 function helix_surface(
-    attributes::Union{Attributes, Makie.ComputeGraph},
+    attributes,
     segment_range::UnitRange{Int},
     all_ca_points::AbstractMatrix{T},
 ) where T <: Real
