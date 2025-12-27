@@ -13,8 +13,8 @@ function Makie.plot!(spatialgraph::SpatialGraphPlot{<:Tuple{Positions,Edges}})
     edge_positions = @lift map($(spatialgraph.edges)) do edge
         (Point3f($(spatialgraph.positions)[edge[1]]), Point3f($(spatialgraph.positions)[edge[2]]))
     end
-    linesegments!(spatialgraph, edge_positions;
-        spatialgraph.attributes..., fxaa=true, transparency=true)
+    linesegments!(spatialgraph, spatialgraph.attributes, edge_positions;
+        fxaa=true, transparency=true)
 end
 
 Makie.args_preferred_axis(::Type{<:SpatialGraphPlot}, positions, edges) = LScene

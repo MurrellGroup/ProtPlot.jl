@@ -57,7 +57,7 @@ for (graph, color) in zip(graphs, [:blue, :red])
 end
 
 p = atomplot!(ax, framesₜ;
-    color=repeat(range(0, 1, n), inner=3), colormap=:jet, alpha=0.5);
+    color=repeat(range(0, 1, n), inner=3), colormap=:jet, colorrange=(0.0, 1.0), alpha=0.5);
 
 #
 

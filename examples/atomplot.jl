@@ -51,7 +51,7 @@ frames₀ = initial_frames(frames₁)
 framesₜ = @lift interpolate_frames(frames₀, frames₁, $time)
 
 p = atomplot!(ax, framesₜ;
-    color=repeat(range(0, 1, size(frames₁.rotations, 3)), inner=3), colormap=:jet);
+    color=repeat(range(0, 1, size(frames₁.rotations, 3)), inner=3), colormap=:jet, colorrange=(0.0, 1.0));
 
 #
 
