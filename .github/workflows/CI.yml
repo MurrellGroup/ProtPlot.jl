@@ -58,14 +58,7 @@ jobs:
       - uses: julia-actions/cache@v2
       - name: Install documentation dependencies
         run: |
-            xvfb-run -s '-screen 0 1024x768x24' julia --project=docs -e '
-              using Pkg
-              Pkg.add([
-                PackageSpec(path = pwd()),
-                PackageSpec(name = "Documenter"), 
-                PackageSpec(name = "GLMakie"), 
-              ])
-              Pkg.instantiate()'
+          xvfb-run -s '-screen 0 1024x768x24' julia --project=docs -e 'using Pkg; Pkg.add(path="."); Pkg.instantiate()'
         env:
           DISPLAY: ':0'
           DATADEPS_ALWAYS_ACCEPT: 'true'
