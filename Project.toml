@@ -1,6 +1,6 @@
 name = "ProtPlot"
 uuid = "77b3afcc-388a-4e14-926d-b99c82d1a01f"
-version = "0.5.17"
+version = "0.5.18"
 authors = ["Anton Oresten <antonoresten@gmail.com>"]
 
 [workspace]
