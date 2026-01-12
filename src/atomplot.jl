@@ -95,7 +95,19 @@ get_bond_threshold(a, b, fallback=0.0) = max(get(BOND_THRESHOLDS, (a, b), fallba
 end
 
 function get_from_dict(dict, atoms, default, (mask_key, mask_value)=(nothing => nothing))
-    dict isa Dict ? [atom_symbol(atom) == mask_key ? mask_value : get(dict, atom_symbol(atom), default) for atom in atoms] : dict
+    if dict isa Dict
+        if isempty(atoms)
+            T = typeof(default)
+            if mask_key !== nothing
+                T = promote_type(T, typeof(mask_value))
+            end
+            return T[]
+        else
+            return [atom_symbol(atom) == mask_key ? mask_value : get(dict, atom_symbol(atom), default) for atom in atoms]
+        end
+    else
+        return dict
+    end
 end
 
 function get_pairs(positions, atoms, tolerance)
@@ -149,11 +161,18 @@ function Makie.plot!(plot::AtomPlot{<:Tuple{<:AbstractVector{<:Atom}}})
     # because the inputs need to be updated simultaneously. see 
     bond_colors = @lift begin
         atoms = $(plot.atoms)
-        color = get_from_dict($(plot.color), atoms, $(plot.default_color))
+        color = get_from_dict($(plot.color), atoms, $(plot.default_color), "X" => $(plot.mask_color))
         positions = atom_coords.(atoms)
         pairs = get_pairs(positions, atoms, $(plot.bond_threshold_tolerance))
-        i_color = color isa AbstractVector ? [color[i] for (i, _) in pairs] : color
-        j_color = color isa AbstractVector ? [color[j] for (_, j) in pairs] : color
+        
+        if color isa AbstractVector
+            T = eltype(color)
+            i_color = isempty(pairs) ? T[] : [color[i] for (i, _) in pairs]
+            j_color = isempty(pairs) ? T[] : [color[j] for (_, j) in pairs]
+        else
+            i_color = color
+            j_color = color
+        end
         return (; i_color, j_color)
     end
     i_color = @lift $bond_colors.i_color
