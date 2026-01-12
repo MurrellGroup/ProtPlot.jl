@@ -269,7 +269,7 @@ function animate_molecules(
     frame_names = nothing,
     rotation = 0.02, extra_seconds = 5, end_rotation_speedup = 0.5, size = (1280, 720),
     framerate = 60, duration = 10.0,
-    theme = :black, kwargs...
+    theme = :black, atomplot_settings = (;), kwargs...
 )
     length(labels) == length(molecules_cache) || throw(ArgumentError("length(labels) must match number of molecule series"))
     if frame_names !== nothing
@@ -312,7 +312,7 @@ function animate_molecules(
             full_label = @lift "$(labels[i]): $(frame_names[i][clamp($timestep, 1, length(frame_names[i]))])"
             Label(fig[1:5, i, Top()], full_label, valign = :bottom, font = :bold, fontsize = 14, padding = (0, 0, 0, 0))
         end
-        atomplot!(ax, current_frame[i], default_size = 0.5f0, show_bonds = true, bond_width = 0.2f0)
+        atomplot!(ax, current_frame[i]; default_size = 0.5f0, show_bonds = true, bond_width = 0.2f0, atomplot_settings...)
         hidespines!(ax)
         hidedecorations!(ax)
         limits!(ax, bounds[i]...)

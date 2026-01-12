@@ -83,7 +83,7 @@ get_bond_threshold(a, b, fallback=0.0) = max(get(BOND_THRESHOLDS, (a, b), fallba
         colorrange = nothing,
         color = ATOM_COLORS,
         default_color = :magenta,
-        mask_color = :orange,
+        mask_color = :darkred,
         size_factor = ATOM_SIZE_FACTORS,
         default_size = 0.7f0,
         bond_width = 0.25f0,
