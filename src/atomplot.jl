@@ -116,7 +116,7 @@ function get_pairs(positions, atoms, tolerance)
     pairs = Tuple{Int,Int}[]
     for i in eachindex(positions)
         for (j, d) in zip(indices[i], distances[i])
-            if i < j && d < get_bond_threshold(atom_symbol(atoms[i]), atom_symbol(atoms[j])) + tolerance
+            if i < j && d > 1e-6 && d < get_bond_threshold(atom_symbol(atoms[i]), atom_symbol(atoms[j])) + tolerance
                 push!(pairs, (i, j))
             end
         end

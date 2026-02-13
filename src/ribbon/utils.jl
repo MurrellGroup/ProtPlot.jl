@@ -14,7 +14,7 @@ function expand_colors(colors::AbstractVector, N::Integer, weights::AbstractVect
         pop!(result)
     end
     while length(result) < N
-        append!(result, colors[end])
+        push!(result, colors[end])
     end
     return reshape(result, :, 1)
 end

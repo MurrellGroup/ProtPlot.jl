@@ -19,6 +19,8 @@
         strand_spline_quality = 20,
         strand_arrow_head_length = 5,
         strand_arrow_head_width = 3.5,
+
+        show_gaps = true,
     )
 end
 
