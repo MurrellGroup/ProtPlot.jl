@@ -23,6 +23,7 @@ import BioStructures
     @test atomplot(Frames(pdb"1ASS"A)) isa Makie.FigureAxisPlot
 
     @test ramachandran(pdb"1ASS") isa Makie.FigureAxisPlot
+    @test ramachandran(pdb"1ASS"A) isa Makie.FigureAxisPlot
 
     mktempdir() do dir
         BioStructures.downloadpdb("1M4X"; dir)

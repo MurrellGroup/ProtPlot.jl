@@ -32,3 +32,5 @@ function Makie.convert_arguments(::Type{<:Ramachandran}, chains::AbstractVector{
 end
 
 Makie.convert_arguments(T::Type{<:Ramachandran}, path::AbstractString) = Makie.convert_arguments(T, read(path, ProteinStructure))
+Makie.convert_arguments(T::Type{<:Ramachandran}, chain::BioStructures.Chain) = Makie.convert_arguments(T, ProteinChain(chain))
+Makie.convert_arguments(T::Type{<:Ramachandran}, structure::BioStructures.MolecularStructure) = Makie.convert_arguments(T, ProteinStructure(structure))
